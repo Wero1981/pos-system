@@ -17,8 +17,24 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="POS System API",
+        default_version='v1',
+        description="API documentation for the POS System",
+        terms_of_service="https://www.google.com/policies/terms/",
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
+
 
 urlpatterns = [
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path("admin/", admin.site.urls),
     path("contabilidad/", include("contabilidad.urls")),
     path("empresas/", include("empresas.urls")),
@@ -27,4 +43,5 @@ urlpatterns = [
     path("productos/", include("productos.urls")),
     path("usuarios/", include("usuarios.urls")),
     path("ventas/", include("ventas.urls")),
+    path("sat/", include("sat.urls"))
 ]
