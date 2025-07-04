@@ -3,6 +3,7 @@ from drf_yasg.utils import swagger_auto_schema
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from empresas.models import Empresa
 from empresas.serializers import EmpresaSerializer
 
@@ -47,7 +48,7 @@ def update_empresa(request, pk):
     View para actualizar una empresa
     """
     try:
-        empresa = Empresa.objects.get(pk=pk)
+        empresa = Empresa.objects.get(id=pk)
         serializer = EmpresaSerializer(empresa, data=request.data)
         if serializer.is_valid():
             serializer.save()

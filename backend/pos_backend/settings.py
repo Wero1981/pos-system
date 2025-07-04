@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     'usuarios',
     'ventas',
     'sat',
-    'user' 
+    'user',
+    'corsheaders',
 ]
 
 REST_FRAMEWORK = {
@@ -67,6 +68,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = "pos_backend.urls"
@@ -152,3 +155,4 @@ SWAGGER_SETTINGS = {
         }
     },
 }
+CORS_ALLOW_ALL_ORIGINS = True

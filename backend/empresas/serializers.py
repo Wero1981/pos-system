@@ -30,3 +30,4 @@ class EmpresaSerializer(serializers.Serializer):
         instance.correo_electronico = validated_data.get('correo_electronico', instance.correo_electronico)
         instance.save()
         return instance
+    
