@@ -4,8 +4,25 @@ from ventas.models import Venta
 from empresas.models import Empresa, Sucursal
 
 class Cliente(models.Model):
-    empresa = models.ForeignKey('empresas.Empresa', on_delete=models.CASCADE, related_name='clientes')
-    sucursal = models.ForeignKey('empresas.Sucursal', on_delete=models.SET_NULL, null=True, blank=True, related_name='clientes')
+    #Empresa que registr el cliente
+    empresa_registradora = models.ForeignKey(
+        'empresas.Empresa', on_delete=models.CASCADE, related_name='clientes_registrados'
+    )
+
+    #EMpresa con la que factura el cliente
+    empresa_facturadora = models.ForeignKey(
+        'empresas.Empresa', on_delete=models.CASCADE, related_name='clientes_facturados'
+    )
+
+    #Sucursal
+    Sucursal = models.ForeignKey(
+        'empresas.Sucursal',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='clientes'
+    )
+
     nombre_completo = models.CharField(max_length=255)
     rfc = models.CharField(max_length=13, unique=True)
     direccion = models.TextField(blank=True, null=True)

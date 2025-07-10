@@ -3,7 +3,16 @@ from django.contrib import admin
 from facturacion.models import Cliente, Factura
 
 class ClienteAdmin(admin.ModelAdmin):
-    list_display = ('empresa', 'sucursal', 'nombre_completo', 'rfc', 'correo', 'telefono', 'fecha_registro')
+    list_display = (
+            'nombre_completo', 
+            'rfc', 
+            'empresa_registradora', 
+            'empresa_facturadora', 
+            'Sucursal',
+            'correo', 
+            'telefono', 
+            'fecha_registro'
+            )
     search_fields = ('nombre_completo', 'rfc', 'correo')
 
 class FacturaAdmin(admin.ModelAdmin):

@@ -1,8 +1,12 @@
-from django.urls import path
-from empresas.views import get_empresa, update_empresa
-app_name = 'empresas'
+#empresas/urls.py
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from empresas.views import EmpresaViewSet, SucursalViewSet
+
+router = DefaultRouter()
+router.register(r'empresas', EmpresaViewSet, basename='empresa')
+router.register(r'sucursales', SucursalViewSet, basename='sucursal')
 
 urlpatterns = [
-    path("", get_empresa, name='get_empresa'),
-    path("<int:pk>/", update_empresa, name='update_empresa'),
+    path('', include(router.urls)),
 ]

@@ -20,6 +20,9 @@ from django.urls import path, include
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from django.conf import settings
+
+
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -34,16 +37,19 @@ schema_view = get_schema_view(
 
 
 urlpatterns = [
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path("admin/", admin.site.urls),
-    path("contabilidad/", include("contabilidad.urls")),
-    path("empresas/", include("empresas.urls")),
-    path("facturacion/", include("facturacion.urls")),
-    path("ia/", include("ia.urls")),
-    path("productos/", include("productos.urls")),
-    path("usuarios/", include("usuarios.urls")),
-    path("ventas/", include("ventas.urls")),
-    path("sat/", include("sat.urls")),
-    path("user/", include("user.urls")),
+    path("api/admin/", admin.site.urls),
+    path("api/contabilidad/", include("contabilidad.urls")),
+    path("api/empresas/", include("empresas.urls")),
+    path("api/facturacion/", include("facturacion.urls")),
+    path("api/ia/", include("ia.urls")),
+    path("api/productos/", include("productos.urls")),
+    path("api/usuarios/", include("usuarios.urls")),
+    path("api/ventas/", include("ventas.urls")),
+    path("api/sat/", include("sat.urls")),
+    path("api/user/", include("user.urls")),
 
 ]
+if settings.DEBUG:
+    urlpatterns += [
+        path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    ]
