@@ -4,6 +4,10 @@ from empresas.models import Empresa  # Si cada producto pertenece a una empresa
 class CategoriaProducto(models.Model):
     nombre = models.CharField(max_length=100, unique=True)
     descripcion = models.TextField(blank=True, null=True)
+    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('nombre', 'empresa')
 
     def __str__(self):
         return self.nombre
@@ -29,6 +33,7 @@ class MovimientoInventario(models.Model):
         ('salida', 'Salida'),
         ('ajuste', 'Ajuste'),
     )
+    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE)
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     tipo_movimiento = models.CharField(max_length=20, choices=TIPOS)
     cantidad = models.IntegerField()
