@@ -10,9 +10,17 @@ class EmpresaSerializer(serializers.ModelSerializer):
             'id',
             'nombre',
             'rfc',
-            'direccion',
+            'calle',
+            'numero_exterior',
+            'numero_interior',
+            'colonia',
+            'codigo_postal',
+            'ciudad',
+            'estado',
+            'pais',
             'telefono',
             'correo_electronico',
+            'tipo_empresa',
             'fecha_registro'
         ]
         read_only_fields = ['fecha_registro']

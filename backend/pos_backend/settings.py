@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'ventas',
     'sat',
     'user',
+    'Paquete',
     'corsheaders',
 ]
 

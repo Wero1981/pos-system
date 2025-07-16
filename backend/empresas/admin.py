@@ -1,9 +1,10 @@
+#empresas/admin.py
 from django.contrib import admin
 
 from empresas.models import Empresa, Sucursal
 
 class EmpresaAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'rfc', 'direccion', 'telefono', 'correo_electronico', 'fecha_registro')
+    list_display = ('nombre', 'rfc', 'direccion_completa', 'telefono', 'correo_electronico', 'fecha_registro')
     search_fields = ('nombre', 'rfc')
 
 class SucursalAdmin(admin.ModelAdmin):

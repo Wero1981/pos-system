@@ -47,6 +47,7 @@ urlpatterns = [
     path("api/ventas/", include("ventas.urls")),
     path("api/sat/", include("sat.urls")),
     path("api/user/", include("user.urls")),
+    path("api/paquetes/", include("Paquete.urls")),
 
 ]
 if settings.DEBUG:
