@@ -1,30 +1,45 @@
-import React, { Component } from 'react';
-import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
-import Login from './components/Auth/Login';
-import TestEmpresa from './components/Empresas/TestEmpresa';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React, { useState, useEffect } from 'react';
+import LoginForm from './components/Auth/Login';
+import PuntoVenta from './components/POS/PuntoVenta';
+import ConfiguracionEmpresaModal from './components/POS/ConfiguracionEmpresaModal';
 
-const PrivateRoute = ({ component: Component, ...rest }) => {
-  const token = localStorage.getItem('token');
-  return (
-    <Route
-      {...rest}
-      render = {(props) =>
-        token ? <Component {...props} /> : <Redirect to="/" />
-      }
-    />
-  );
-};
+function App (){
+  const [autenticado, setAutenticado] = useState(false);
+  const [empresaConfigurada, setEmpresaConfigurada] = useState(false);
 
-function App() {
-  return (
-    <Router>
-      <Switch>
-        <Route exact path="/" component={Login} />
-        <PrivateRoute path="/empresas" component={TestEmpresa} />
-      </Switch>
-    </Router>
-  );
+  useEffect (() => {
+    const token = localStorage.getItem('acces');
+    if(token) setAutenticado(true)
+  }, []);
+
+  const verificarConfiguracionEmpresa = async () =>{
+    const configurada = true;
+    setEmpresaConfigurada(configurada)
+  }
+
+  useEffect (() => {
+    if(autenticado){
+      verificarConfiguracionEmpresa();
+    }
+  }, [autenticado])
+
+  if(!autenticado){
+     return (
+      <div>
+        <LoginForm></LoginForm>
+      </div>
+    );
+
+  }
+   return (
+      <>
+        {/* Necesitas crear estos componentes o simularlos */}
+        <PuntoVenta />
+        {!empresaConfigurada && <ConfiguracionEmpresaModal />}
+      </>
+    );
+
 }
+
 
 export default App;

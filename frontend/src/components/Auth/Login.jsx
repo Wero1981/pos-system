@@ -1,71 +1,56 @@
 import React, { useState } from 'react';
-import { Form, Button, Alert, Container} from 'react-bootstrap';
-import axios from 'axios';
-import { useHistory } from 'react-router-dom/cjs/react-router-dom.min';
+// import axios from 'axios';
 
-const Login = () => {
-    const [form, setForm] = useState({
+
+function LoginForm ({onLogin }){
+    
+    const [formData, setFormData] = useState({
         username: '',
         password: ''
     });
-    const [error, setError] = useState('');
-    const history = useHistory();
 
-    const handleChange = (e) => {
-        setForm({
-            ...form,
-            [e.target.name]: e.target.value
-        });
-    };
+    const procesarDatos = e => {
+        const { name, value } = e.target;
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            [name]: value
+        }))
+    }
 
-    const handleSubmit = async (e) => {
+    const hadleSubmit = (e) =>{
         e.preventDefault();
-        setError('');
+        console.log('Enviando credenciales', formData.username, formData.password);
+        
+    }
 
-        try {
-            const response = await axios.post('http://127.0.0.1:8000/user/token/', form);
-            localStorage.setItem('token', response.data.access);
-            console.log('Token:', response.data.access);
-            history.push('/'); // Redirect to home page after successful login
-        } catch (err) {
-            setError('Usuario o contraseña incorrectos');
-
-        }
-    };  
-
-    return (
-        <Container className="mt-5" style={{ maxWidth: '400px' }}>
-            <h2 className="text-center mb-4">Iniciar Sesión</h2>
-            {error && <Alert variant="danger">{error}</Alert>}
-            <Form onSubmit={handleSubmit}>
-                <Form.Group controlId="username">
-                    <Form.Label>Usuario</Form.Label>
-                    <Form.Control
-                        type="text"
-                        placeholder="Ingrese su usuario"
+    return(
+        <div className='container mt-5'>
+            <h2>Iniciar sesión</h2>
+            <form onSubmit={hadleSubmit}>
+                <div className='mb-3'>
+                    <label>Usuario</label>
+                    <input 
+                        type="text" 
+                        className='form-control'
                         name="username"
-                        value={form.username}
-                        onChange={handleChange}
-                        required
-                    />
-                </Form.Group>
-                <Form.Group controlId="password">
-                    <Form.Label>Contraseña</Form.Label>
-                    <Form.Control
-                        type="password"
-                        placeholder="Ingrese su contraseña"
+                        value={formData.username}
+                        onChange={procesarDatos}
+                        />
+                </div>
+                <div className='mb-3'>
+                    <label>Contraseña</label>
+                    <input 
+                        type="password" 
+                        className="form-control" 
                         name="password"
-                        value={form.password}
-                        onChange={handleChange}
-                        required
-                    />
-                </Form.Group>
-                <Button variant="primary" type="submit" className="w-100 mt-3">
-                    Iniciar Sesión
-                </Button>
-            </Form>
-        </Container>
-    );
-};
+                        value={formData.password}
+                        onChange={procesarDatos}
+                        />
+                </div>
+                <button className='btn btn-primary' type="submit">Entrar</button>
+            </form>
+        </div>
+    )
+}
 
-export default Login;
+export default LoginForm;
