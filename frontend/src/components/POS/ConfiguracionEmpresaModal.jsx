@@ -1,9 +1,17 @@
 import React from 'react'
+import { useState } from 'react';
 import { Modal, Button } from 'react-bootstrap'
 
 function ConfiguracionEmpresaModal(){
+
+    const [show, setShow] = useState(true);
+    const guardarConfiguracion = () => {
+        // Aquí podrías hacer una llamada a la API para guardar la configuración
+        setShow(false);
+    }
+
     return(
-        <Modal show="true" backdrop="static" keyboard={false}>
+        <Modal show={show} backdrop="static" keyboard={false}>
             <Modal.Header>
                 <Modal.Title>
                     Configuración inicial requerida
@@ -14,7 +22,7 @@ function ConfiguracionEmpresaModal(){
                 {/* TODO - Formulario de configuracion */}
             </Modal.Body>
             <Modal.Footer>
-                <Button variant='primary'>Guardar Configuración</Button>
+                <Button variant='primary' onClick={guardarConfiguracion}>Guardar Configuración</Button>
             </Modal.Footer>
 
         </Modal>

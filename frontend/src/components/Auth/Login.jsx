@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-// import axios from 'axios';
+import { Form, Button, Container, Row, Col } from 'react-bootstrap';
+import axios from 'axios';
 
 
 function LoginForm ({onLogin }){
@@ -19,37 +20,57 @@ function LoginForm ({onLogin }){
 
     const hadleSubmit = (e) =>{
         e.preventDefault();
-        console.log('Enviando credenciales', formData.username, formData.password);
-        
+        // Aquí podrías hacer una llamada a la API para autenticar al usuario        
+        try{
+            const response = axios.post('http://127.0.0.1:8000/api/user/token/', {
+                username: formData.username,
+                password: formData.password
+            });
+            response.then(res => {
+                if (res.status === 200) {
+                    localStorage.setItem('access', res.data.access);
+                    localStorage.setItem('refresh', res.data.refresh);
+                    //onLogin(); // Llama a la función onLogin pasada como prop
+                    
+                }
+            }).catch(error => {
+                console.error('Error al iniciar sesión:', error);
+                alert('Error al iniciar sesión. Por favor, verifica tus credenciales.');
+            });
+        }catch (error) {
+
+        }
     }
 
     return(
-        <div className='container mt-5'>
-            <h2>Iniciar sesión</h2>
-            <form onSubmit={hadleSubmit}>
-                <div className='mb-3'>
-                    <label>Usuario</label>
-                    <input 
-                        type="text" 
-                        className='form-control'
-                        name="username"
-                        value={formData.username}
-                        onChange={procesarDatos}
-                        />
-                </div>
-                <div className='mb-3'>
-                    <label>Contraseña</label>
-                    <input 
-                        type="password" 
-                        className="form-control" 
-                        name="password"
-                        value={formData.password}
-                        onChange={procesarDatos}
-                        />
-                </div>
-                <button className='btn btn-primary' type="submit">Entrar</button>
-            </form>
-        </div>
+        <Container>
+            <Row className = "justify-content-md-center mt-5">
+                <Col xs={12} md={6}>
+                    <h2>Iniciar sesión</h2>
+                    <Form onSubmit={hadleSubmit}>
+                        <Form.Group className='mb-3'>
+                            <Form.Label>Usuario</Form.Label>
+                            <Form.Control
+                                type="text"
+                                name="username"
+                                value={formData.username}
+                                onChange={procesarDatos}
+                            />
+                        </Form.Group>
+                        <Form.Group className='mb-3'>
+                            <Form.Label>Contraseña</Form.Label>
+                            <Form.Control
+                                type="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={procesarDatos}
+                            />
+                        </Form.Group>
+                        <Button className='btn btn-primary' type="submit">Entrar</Button>
+                    </Form>
+                </Col>
+            </Row>
+        </Container>
     )
 }
 

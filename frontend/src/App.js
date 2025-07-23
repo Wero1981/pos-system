@@ -8,12 +8,12 @@ function App (){
   const [empresaConfigurada, setEmpresaConfigurada] = useState(false);
 
   useEffect (() => {
-    const token = localStorage.getItem('acces');
+    const token = localStorage.getItem('access');
     if(token) setAutenticado(true)
   }, []);
 
   const verificarConfiguracionEmpresa = async () =>{
-    const configurada = true;
+    const configurada = false;
     setEmpresaConfigurada(configurada)
   }
 
@@ -25,9 +25,7 @@ function App (){
 
   if(!autenticado){
      return (
-      <div>
-        <LoginForm></LoginForm>
-      </div>
+      <LoginForm onLogin={() => setAutenticado(true)} />
     );
 
   }

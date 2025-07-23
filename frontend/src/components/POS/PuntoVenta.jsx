@@ -10,12 +10,12 @@ function PuntoVenta(){
                     <Card className="mb-3 shadow-sm">
                         <Card.Header>Búsqueda de Productos</Card.Header>
                         <Card.Body>
-                            <Form.Control type="text" placeholder="Buscar Productos">
-                                <div className="mt-3">
-                                    {/* Lista Simulada de productos */}
-                                    <Row>
-                                        <Col md={4} className="mb-2">
-                                            <Card className="h-100">
+                            <Form.Control type="text" placeholder="Buscar Productos" />
+                            <div className="mt-3">
+                                {/* Lista Simulada de productos */}
+                                <Row>
+                                    <Col md={4} className="mb-2">
+                                        <Card className="h-100">
                                                 <Card.Body>
                                                     <Card.Title>Producto 1</Card.Title>
                                                     <Card.Text>$50.00</Card.Text>
@@ -43,7 +43,6 @@ function PuntoVenta(){
                                         </Col>
                                     </Row>
                                 </div>
-                            </Form.Control>
                         </Card.Body>
                     </Card>
                 </Col>
