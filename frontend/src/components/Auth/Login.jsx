@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Form, Button, Container, Row, Col } from 'react-bootstrap';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 
 function LoginForm ({onLogin }){
@@ -18,11 +19,11 @@ function LoginForm ({onLogin }){
         }))
     }
 
-    const hadleSubmit = (e) =>{
+    const hadleSubmit = async (e) =>{
         e.preventDefault();
         // Aquí podrías hacer una llamada a la API para autenticar al usuario        
         try{
-            const response = axios.post('http://127.0.0.1:8000/api/user/token/', {
+            const response = await axios.post('http://127.0.0.1:8000/api/user/token/', {
                 username: formData.username,
                 password: formData.password
             });
@@ -30,7 +31,7 @@ function LoginForm ({onLogin }){
                 if (res.status === 200) {
                     localStorage.setItem('access', res.data.access);
                     localStorage.setItem('refresh', res.data.refresh);
-                    //onLogin(); // Llama a la función onLogin pasada como prop
+                    onLogin(); // Llama a la función onLogin pasada como prop
                     
                 }
             }).catch(error => {
@@ -68,6 +69,9 @@ function LoginForm ({onLogin }){
                         </Form.Group>
                         <Button className='btn btn-primary' type="submit">Entrar</Button>
                     </Form>
+                    <Form.Text className="mt-3">
+                        No tienes una cuenta? <Link to="/register">Registrate</Link>
+                    </Form.Text>
                 </Col>
             </Row>
         </Container>
