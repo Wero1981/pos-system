@@ -27,9 +27,31 @@ function Register({onRegisterSuccess}){
         e.preventDefault();
         setError(null);
         setMensaje(null);
+        if (form.password !== form.confirmPassword) {
+            setError('Las contraseñas no coinciden');
+            return;
+        }
+        let username = form.username;
+        username = username.trim();
+        
+        if (username.length < 5) {
+            setError('El nombre de usuario debe tener al menos 5 caracteres');
+            return;
+        }
+        let email = form.email;
+        if (!email.includes('@')) {
+            setError('El correo electrónico no es válido');
+            return;
+        }
 
         try{
-         const res = await axios.post('http://127.0.0.1:8000/api/user/registro/', form);
+         const res = await axios.post('http://127.0.0.1:8000/api/user/registro/', 
+            {
+                username: form.username,
+                email: form.email,
+                password: form.password
+            }
+         );
          setMensaje( res.data.message);
          onRegisterSuccess();
 

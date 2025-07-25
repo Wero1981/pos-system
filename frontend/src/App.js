@@ -30,6 +30,10 @@ function App (){
       setEmpresaConfigurada(false);
     }
   };
+
+  const handleRegistroExitoso = () => {
+    Navigate('/login');
+  };
     return (
     <Router>
       <Routes>
@@ -43,7 +47,7 @@ function App (){
         />
         <Route
           path="/register"
-          element={<Register />}
+          element={<Register onRegisterSuccess={ handleRegistroExitoso } />}
         />
         <Route
           path="/pos"
