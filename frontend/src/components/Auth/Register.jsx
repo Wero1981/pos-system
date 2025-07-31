@@ -23,7 +23,38 @@ function Register({onRegisterSuccess}){
         });
     }
 
-    const handleSubmint = async e => {
+    const checkUsername = async e => {
+        if(!form.username) return;
+        try {
+            const res = await axios.post("http://127.0.0.1:8000/api/user/registro/check-username/", {
+                username: form.username
+            });
+            if (res.data.exists) {
+                setError('El nombre de usuario ya está en uso');
+            } else {
+                setError(null);
+            }
+        } catch (err) {
+            setError('Error al verificar el nombre de usuario');
+        }
+    }
+    const checkEmail = async e => {
+        if(!form.email) return;
+        try {
+            const res = await axios.post("http://127.0.0.1:8000/api/user/registro/check-email/", {
+                email: form.email
+            });
+            if (res.data.exists) {
+                setError('El email ya está en uso');
+            } else {
+                setError(null);
+            }
+        } catch (err) {
+            setError('Error al verificar el email');
+        }
+    }   
+
+    const handleSubmit = async e => {
         e.preventDefault();
         setError(null);
         setMensaje(null);
@@ -56,7 +87,14 @@ function Register({onRegisterSuccess}){
          onRegisterSuccess();
 
         }catch(err){
-            setError('Error al registrar el usuario');
+            setError(err.response.data.errors || 'Error al registrar el usuario');
+           if(err.response.data.errors.username){
+                setError(err.response.data.errors.username[0]);
+            }
+            if(err.response.data.errors.email){
+                setError(err.response.data.errors.email[0]);
+            }
+           
         }
     };
 
@@ -66,14 +104,15 @@ function Register({onRegisterSuccess}){
                 <h3 className="mb-4">Registro de Usuario</h3>
                 {mensaje && <Alert variant="success">{mensaje}</Alert>}
                 {error && <Alert variant="danger">{JSON.stringify(error)}</Alert>}
-                <Form onSubmit={handleSubmint}>
+                <Form onSubmit={handleSubmit}>
                     <Form.Group controlId="formUsername" className='mb-3'>
                         <Form.Label>Nombre de Usuario</Form.Label>
                         <Form.Control 
                             type="text" 
                             name="username" 
                             value={form.username} 
-                            onChange={handleChange} 
+                            onChange={handleChange}
+                            onBlur={checkUsername}
                             required />
                     </Form.Group>
 
@@ -83,7 +122,8 @@ function Register({onRegisterSuccess}){
                             type="email" 
                             name="email" 
                             value={form.email} 
-                            onChange={handleChange} 
+                            onChange={handleChange}
+                            onBlur={checkEmail}
                             required />
                     </Form.Group>
 

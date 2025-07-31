@@ -2,6 +2,8 @@ from rest_framework import viewsets, permissions, mixins
 from .models import CustomerUser
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status
 from .serializers import CustomTokenObtainPairSerializer, CustomerUserSerializer, CustomerUserRegisterSerializer
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -60,4 +62,68 @@ class CustomerUserRegisterViewSet(mixins.CreateModelMixin, viewsets.GenericViewS
     serializer_class = CustomerUserRegisterSerializer
     permission_classes = [permissions.AllowAny]
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        # Validar datos
+
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response(
+                {
+                    "success": True,
+                    "message": "Usuario creado correctamente",
+                    "user":
+                    {
+                        'id': user.id,
+                        'username': user.username,
+                        'email':user.email
+                    }
+                },
+                status = status.HTTP_201_CREATED
+            )
+        
+        return Response(
+            {
+                "success": False,
+                "errors": serializer.errors
+            },
+            status = status.HTTP_400_BAD_REQUEST
+        )
+
+    @action(detail=False, methods=['post'], url_path='check-username')
+    def check_username(self, request):
+        """
+        Endpoint para verificar si un nombre de usuario ya está en uso.
+        """
+        username = request.data.get('username')
+        if not username:
+            return Response(
+                {"success": False, "error": "El nombre de usuario es requerido."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        exists = CustomerUser.objects.filter(username=username).exists()
+        return Response(
+            {"success": True, "exists": exists},
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, methods=['post'], url_path='check-email')
+    def check_email(self, request):
+        """
+        Endpoint para verificar si un email ya está en uso.
+        """
+        email = request.data.get('email')
+        if not email:
+            return Response(
+                {"success": False, "error": "El email es requerido."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        exists = CustomerUser.objects.filter(email=email).exists()
+        return Response(
+            {"success": True, "exists": exists},
+            status=status.HTTP_200_OK
+        )
 

@@ -71,6 +71,15 @@ class CustomerUserSerializer(serializers.ModelSerializer):
         return user
     
 class CustomerUserRegisterSerializer(serializers.ModelSerializer):
+
+    username = serializers.CharField(
+        max_length=150, 
+        validators=[],
+        )
+    email = serializers.EmailField(
+        max_length=254, 
+        validators=[],
+        )
     password = serializers.CharField(write_only=True)
 
     class Meta:
@@ -81,20 +90,27 @@ class CustomerUserRegisterSerializer(serializers.ModelSerializer):
             'username',
             'password',
         ]
-    read_only_fields = ['id']
+        read_only_fields = ['id']
 
-    def validate(self, data):
+    def validate_username(self, value):
         """
-        Validar que el email y username no existan
+        Validar que el username no esté en uso
         """
-        if CustomerUser.objects.filter(email=data['email']).exists():
-            raise serializers.ValidationError("El email ya está en uso.")
-        if CustomerUser.objects.filter(username=data['username']).exists():
+        if CustomerUser.objects.filter(username=value).exists():
             raise serializers.ValidationError("El nombre de usuario ya está en uso.")
-        return data
-    
-    
-    
+
+        return value
+
+    def validate_email(self, value):
+        """
+        Validar que el email no esté en uso
+        """
+        if CustomerUser.objects.filter(email=value).exists():
+            raise serializers.ValidationError("El email ya está en uso.")
+
+        return value
+
+
     def create(self, validated_data):
         """
         Crear un nuevo usuario para registro al pos
