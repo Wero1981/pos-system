@@ -83,6 +83,7 @@ function Register({onRegisterSuccess}){
                 password: form.password
             }
          );
+         console.log(res);
          setMensaje( res.data.message);
          onRegisterSuccess();
 

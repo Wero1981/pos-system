@@ -3,11 +3,12 @@ import LoginForm from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import PuntoVenta from './components/POS/PuntoVenta';
 import ConfiguracionEmpresaModal from './components/POS/ConfiguracionEmpresaModal';
-import {BrowserRouter as Router, Route, Routes, Navigate} from 'react-router-dom';
+import {Route, Routes, Navigate, useNavigate} from 'react-router-dom';
 
 function App (){
   const [autenticado, setAutenticado] = useState(false);
   const [empresaConfigurada, setEmpresaConfigurada] = useState(false);
+  const navigate = useNavigate();
 
   useEffect (() => {
     const token = localStorage.getItem('access');
@@ -17,13 +18,14 @@ function App (){
   useEffect (() => {
     if(autenticado){
       verificarConfiguracionEmpresa();
+      navigate('/pos');
     }
-  }, [autenticado])
+  }, [autenticado, navigate]);
 
   const verificarConfiguracionEmpresa = async () => {
     try {
       //todo: Implementar la lógica para verificar si la empresa está configurada
-      const configurada = false; // Simulación de verificación
+      const configurada = true; // Simulación de verificación
       setEmpresaConfigurada(configurada);
     } catch (error) {
       console.error('Error al verificar la configuración de la empresa:', error);
@@ -31,11 +33,17 @@ function App (){
     }
   };
 
-  const handleRegistroExitoso = () => {
-    Navigate('/login');
+  const onConfiguracionComplete = () => {
+    setEmpresaConfigurada(true);
+    navigate('/pos');
+  };
+
+
+  const onRegisterSuccess = () => {
+    navigate('/login');
   };
     return (
-    <Router>
+
       <Routes>
         <Route
           path="/"
@@ -47,7 +55,7 @@ function App (){
         />
         <Route
           path="/register"
-          element={<Register onRegisterSuccess={ handleRegistroExitoso } />}
+          element={<Register onRegisterSuccess={ onRegisterSuccess } />}
         />
         <Route
           path="/pos"
@@ -56,7 +64,7 @@ function App (){
               empresaConfigurada ? (
                 <PuntoVenta />
               ) : (
-                <ConfiguracionEmpresaModal />
+                <ConfiguracionEmpresaModal onConfiguracionComplete={onConfiguracionComplete} />
               )
             ) : (
               <Navigate to="/login" />
@@ -64,7 +72,7 @@ function App (){
           }
         />
       </Routes>
-    </Router>
+  
   );
 
 }

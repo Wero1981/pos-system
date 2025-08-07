@@ -27,17 +27,11 @@ function LoginForm ({onLogin }){
                 username: formData.username,
                 password: formData.password
             });
-            response.then(res => {
-                if (res.status === 200) {
-                    localStorage.setItem('access', res.data.access);
-                    localStorage.setItem('refresh', res.data.refresh);
-                    onLogin(); // Llama a la función onLogin pasada como prop
-                    
-                }
-            }).catch(error => {
-                console.error('Error al iniciar sesión:', error);
-                alert('Error al iniciar sesión. Por favor, verifica tus credenciales.');
-            });
+            if (response.data.access) {
+                localStorage.setItem('access', response.data.access);
+                localStorage.setItem('refresh', response.data.refresh);
+                onLogin(); // Llama a la función onLogin pasada como prop
+            }
         }catch (error) {
 
         }

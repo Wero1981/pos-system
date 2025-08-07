@@ -2,12 +2,13 @@ import React from 'react'
 import { useState } from 'react';
 import { Modal, Button } from 'react-bootstrap'
 
-function ConfiguracionEmpresaModal(){
+function ConfiguracionEmpresaModal({onConfiguracionComplete}){
 
     const [show, setShow] = useState(true);
     const guardarConfiguracion = () => {
         // Aquí podrías hacer una llamada a la API para guardar la configuración
         setShow(false);
+        onConfiguracionComplete(); // Llama a la función pasada como prop para indicar que la configuración se ha completado
     }
 
     return(
