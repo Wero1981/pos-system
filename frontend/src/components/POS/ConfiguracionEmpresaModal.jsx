@@ -20,7 +20,20 @@ function ConfiguracionEmpresaModal({onConfiguracionComplete}){
             </Modal.Header>
             <Modal.Body>
                 <p>Por Favor completa la informacion de tu empresa para continuar</p>
-                {/* TODO - Formulario de configuracion */}
+                <form>
+                    <div className="mb-3">
+                        <label htmlFor="nombre" className="form-label">Nombre de la Empresa</label>
+                        <input type="text" className="form-control" id="nombre" required />
+                    </div>
+                    <div className="mb-3">
+                        <label htmlFor="direccion" className="form-label">Dirección</label>
+                        <input type="text" className="form-control" id="direccion" required />
+                    </div>
+                    <div className="mb-3">
+                        <label htmlFor="telefono" className="form-label">Teléfono</label>
+                        <input type="tel" className="form-control" id="telefono" required />
+                    </div>
+                </form>
             </Modal.Body>
             <Modal.Footer>
                 <Button variant='primary' onClick={guardarConfiguracion}>Guardar Configuración</Button>

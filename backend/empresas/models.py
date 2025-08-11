@@ -12,6 +12,7 @@ class Empresa(models.Model):
     ]
     nombre = models.CharField(max_length=255)
     rfc = models.CharField(max_length=13, unique=True)
+    logo = models.ImageField(upload_to='logos_empresas/', blank=True, null=True)
     calle = models.TextField(blank=True, null=True)
     numero_exterior = models.CharField(max_length=10, blank=True, null=True)
     numero_interior = models.CharField(max_length=10, blank=True, null=True)

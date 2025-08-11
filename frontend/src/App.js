@@ -25,7 +25,7 @@ function App (){
   const verificarConfiguracionEmpresa = async () => {
     try {
       //todo: Implementar la lógica para verificar si la empresa está configurada
-      const configurada = true; // Simulación de verificación
+      const configurada = false; // Simulación de verificación
       setEmpresaConfigurada(configurada);
     } catch (error) {
       console.error('Error al verificar la configuración de la empresa:', error);
