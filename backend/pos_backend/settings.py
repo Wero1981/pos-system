@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'rest_framework',
+    'rest_framework.authtoken',
     'drf_yasg',
     'contabilidad',
     'empresas',
@@ -51,6 +52,15 @@ INSTALLED_APPS = [
     'user',
     'Paquete',
     'corsheaders',
+
+    #allauth
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+
+    #Proveedores que permiten autenticación social
+    'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.facebook',
 ]
 
 REST_FRAMEWORK = {
@@ -65,13 +75,13 @@ REST_FRAMEWORK = {
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",  # primero de CORS
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "allauth.account.middleware.AccountMiddleware",  # necesario para allauth
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = "pos_backend.urls"
@@ -150,6 +160,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = 'user.CustomerUser'
 
+ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = "username_email"
+ACCOUNT_UNIQUE_EMAIL = True
+
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
         'api_key': {
@@ -160,3 +176,35 @@ SWAGGER_SETTINGS = {
     },
 }
 CORS_ALLOW_ALL_ORIGINS = True
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': ["profile", "email"],
+    },
+    'facebook': {
+        'METHOD':"oauth2",
+        'SCOPE': ["email"],
+        'AUTH_PARAMS': {
+            'auth_type': 'reauthenticate',
+        },
+        'FIELDS':[
+            "id",
+            "email",
+            "name",
+            "first_name",
+            "last_name",
+            "verified"
+        ],
+        'VERSION': 'v12.0'
+    }
+}
+
+# settings.py
+REST_USE_JWT = True
+
+# Opcional: cookies de JWT si quieres
+DJ_REST_AUTH = {
+    "USE_JWT": True,
+    "JWT_AUTH_COOKIE": "access-token",
+    "JWT_AUTH_REFRESH_COOKIE": "refresh-token",
+}
