@@ -1,11 +1,13 @@
-from rest_framework import viewsets, permissions, mixins
+from rest_framework import viewsets, permissions, mixins, generics
 from .models import CustomerUser
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import CustomTokenObtainPairSerializer, CustomerUserSerializer, CustomerUserRegisterSerializer
+from drf_yasg.utils import swagger_auto_schema
 
+#Login con JWT
 class CustomTokenObtainPairView(TokenObtainPairView):
     """
     View para obtener el token JWT personalizado.
@@ -14,6 +16,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
     serializer_class = CustomTokenObtainPairSerializer
 
+#ViewSet para usuarios
 class CustomerUserViewSet(viewsets.ModelViewSet):
     """
     ViewSet para manejar los usuarios del sistema.
@@ -53,6 +56,7 @@ class CustomerUserViewSet(viewsets.ModelViewSet):
         else:
             serializer.save()
 
+#Registro clasico
 class CustomerUserRegisterViewSet(mixins.CreateModelMixin, viewsets.GenericViewSet):
     """
     ViewSet para registrar nuevos usuarios.
@@ -127,3 +131,15 @@ class CustomerUserRegisterViewSet(mixins.CreateModelMixin, viewsets.GenericViewS
             status=status.HTTP_200_OK
         )
 
+#Vista para actualizar el usuario autenticado
+class userUpdateView(generics.UpdateAPIView):
+    """
+    View para actualizar el usuario autenticado.
+    """
+    queryset = CustomerUser.objects.all()
+    serializer_class = CustomerUserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    @swagger_auto_schema(operation_description="Obtener el usuario autenticado")
+    def get_object(self):
+        return self.request.user

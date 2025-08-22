@@ -14,7 +14,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['email'] = user.email
 
         token['rol'] = user.rol
-
+        token['empresa_configurada'] = True if user.empresa else False
         return token
 
 class CustomerUserSerializer(serializers.ModelSerializer):
@@ -123,4 +123,6 @@ class CustomerUserRegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+    
+
     
