@@ -11,7 +11,7 @@ class Empresa(models.Model):
         ('otro', 'Otro'),
     ]
     nombre = models.CharField(max_length=255)
-    rfc = models.CharField(max_length=13, unique=True)
+    rfc = models.CharField(max_length=13, unique=True, blank=True, null=True)
     logo = models.ImageField(upload_to='logos_empresas/', blank=True, null=True)
     calle = models.TextField(blank=True, null=True)
     numero_exterior = models.CharField(max_length=10, blank=True, null=True)
@@ -26,6 +26,8 @@ class Empresa(models.Model):
     tipo_empresa = models.CharField(max_length=20, choices=TIPO_EMPRESA_CHOICES, default='otro')
     plan = models.ForeignKey('Paquete.Paquete', on_delete=models.SET_NULL, null=True, blank=True, related_name='empresas')
     fecha_registro = models.DateTimeField(auto_now_add=True)
+    es_matriz = models.BooleanField(default=False)
+
     def __str__(self):
         return f"{self.nombre} - ({self.rfc})"
     

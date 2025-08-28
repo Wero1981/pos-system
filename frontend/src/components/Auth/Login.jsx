@@ -21,7 +21,7 @@ function LoginForm ({onLogin }){
 
     const hadleSubmit = async (e) =>{
         e.preventDefault();
-        // Aquí podrías hacer una llamada a la API para autenticar al usuario        
+              
         try{
             const response = await axios.post('http://127.0.0.1:8000/api/user/token/', {
                 username: formData.username,
@@ -31,7 +31,7 @@ function LoginForm ({onLogin }){
                 localStorage.setItem('access', response.data.access);
                 localStorage.setItem('refresh', response.data.refresh);
                 onLogin(); // Llama a la función onLogin pasada como prop
-            }else
+            }
         }catch (error) {
 
         }
