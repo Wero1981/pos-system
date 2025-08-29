@@ -7,9 +7,9 @@ class CategoriaProductoAdmin(admin.ModelAdmin):
     search_fields = ('nombre', 'descripcion')
 
 class ProductoAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'codigo_barras', 'precio_venta', 'costo', 'stock_actual', 'categoria', 'empresa', 'fecha_registro')
-    search_fields = ('nombre', 'codigo_barras', 'empresa__nombre')
-    list_filter = ('categoria', 'empresa')
+    list_display = ('nombre', 'codigo_barras', 'precio_venta', 'costo', 'stock_actual', 'categoria', 'sucursal', 'fecha_registro')
+    search_fields = ('nombre', 'codigo_barras', 'sucursal__nombre')
+    list_filter = ('categoria', 'sucursal')
 
 class MovimientoInventarioAdmin(admin.ModelAdmin):
     list_display = ('producto', 'tipo_movimiento', 'cantidad', 'motivo', 'fecha')

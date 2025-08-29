@@ -3,11 +3,13 @@ from django.db import models
 
 class Empresa(models.Model):
     TIPO_EMPRESA_CHOICES = [
-        ('retail', 'Retail'),
-        ('servicios', 'Servicios'),
-        ('manufactura', 'Manufactura'),
-        ('distribucion', 'Distribución'),
-        ('restaurante', 'Restaurante'),
+        ('retail', 'Retail'),#tiendas de ropa, electronica, abarrotes, etc
+        ('servicios', 'Servicios'), #peluquerias, salones de belleza, talleres, etc
+        ('manufactura', 'Manufactura'), #fabrica de productos
+        ('distribucion', 'Distribución'), #centros de distribución y logística
+        ('salud', 'Salud'), #clínicas, consultorios, farmacias
+        ('educacion', 'Educación'), #instituciones educativas
+        ('restaurante', 'Restaurante'), #negocios de comida y bebida
         ('otro', 'Otro'),
     ]
     nombre = models.CharField(max_length=255)

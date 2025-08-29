@@ -30,4 +30,31 @@ class MovimientoInventarioSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MovimientoInventario
-        fields = '__all__'
+        fields = ['id', 
+                  'tipo_movimiento', 
+                  'cantidad', 
+                  'motivo', 
+                  'fecha', 
+                  'producto', 
+                  'producto_id', 
+                  'sucursal']
+        read_only_fields = ['id', 'fecha']
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        request = self.context.get('request')
+        if request and hasattr(request.user, 'sucursal'):
+            self.fields['producto_id'].queryset = Producto.objects.filter(sucursal=request.user.sucursal)
+
+    def validate_cantidad(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("La cantidad debe ser mayor que cero.")
+        return value
+
+    def validate(self, data):
+        producto = data.get('producto')
+        sucursal = data.get('sucursal')
+
+        if producto and sucursal and producto.sucursal_id != sucursal.id:
+            raise serializers.ValidationError("El producto no pertenece a la sucursal especificada.")
+        return data

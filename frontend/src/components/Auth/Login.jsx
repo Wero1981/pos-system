@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
+import AuthServices from '../../services/AuthServices';
 import { Form, Button, Container, Row, Col } from 'react-bootstrap';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
 
 
@@ -23,17 +23,11 @@ function LoginForm ({onLogin }){
         e.preventDefault();
               
         try{
-            const response = await axios.post('http://127.0.0.1:8000/api/user/token/', {
-                username: formData.username,
-                password: formData.password
-            });
-            if (response.data.access) {
-                localStorage.setItem('access', response.data.access);
-                localStorage.setItem('refresh', response.data.refresh);
-                onLogin(); // Llama a la función onLogin pasada como prop
-            }
+            await AuthServices.login(formData.username, formData.password);
+            onLogin();
+   
         }catch (error) {
-
+            alert("Error en el inicio de sesión. Verifica tus credenciales.");
         }
     }
 

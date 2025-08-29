@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-
-import axios from 'axios';
+import AuthServices from '../../services/AuthServices';
 import {Form, Button, Alert, Card, Container} from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
@@ -26,14 +25,15 @@ function Register({onRegisterSuccess}){
     const checkUsername = async e => {
         if(!form.username) return;
         try {
-            const res = await axios.post("http://127.0.0.1:8000/api/user/registro/check-username/", {
-                username: form.username
-            });
-            if (res.data.exists) {
+            const res = await AuthServices.checkUsernameExists(form.username);
+            if (res) {
                 setError('El nombre de usuario ya está en uso');
+                console.log("[DEBUG] EL USUARIO YA EXISTE");
             } else {
                 setError(null);
+                console.log("[DEBUG] EL USUARIO NO EXISTE");
             }
+            
         } catch (err) {
             setError('Error al verificar el nombre de usuario');
         }
@@ -41,17 +41,18 @@ function Register({onRegisterSuccess}){
     const checkEmail = async e => {
         if(!form.email) return;
         try {
-            const res = await axios.post("http://127.0.0.1:8000/api/user/registro/check-email/", {
-                email: form.email
-            });
-            if (res.data.exists) {
+            const res = await AuthServices.checkEmailExists(form.email);
+            if (res) {
                 setError('El email ya está en uso');
+                console.log("[DEBUG] EL EMAIL YA EXISTE");
             } else {
                 setError(null);
+                console.log("[DEBUG] EL EMAIL NO EXISTE");
             }
         } catch (err) {
             setError('Error al verificar el email');
         }
+          
     }   
 
     const handleSubmit = async e => {
@@ -60,6 +61,10 @@ function Register({onRegisterSuccess}){
         setMensaje(null);
         if (form.password !== form.confirmPassword) {
             setError('Las contraseñas no coinciden');
+            return;
+        }
+        if(form.password.length < 8) {
+            setError('La contraseña debe tener al menos 8 caracteres');
             return;
         }
         let username = form.username;
@@ -76,25 +81,13 @@ function Register({onRegisterSuccess}){
         }
 
         try{
-         const res = await axios.post('http://127.0.0.1:8000/api/user/registro/', 
-            {
-                username: form.username,
-                email: form.email,
-                password: form.password
-            }
-         );
+         const res = await AuthServices.register(username, email, form.password, form.confirmPassword);
          console.log(res);
          setMensaje( res.data.message);
          onRegisterSuccess();
 
         }catch(err){
-            setError(err.response.data.errors || 'Error al registrar el usuario');
-           if(err.response.data.errors.username){
-                setError(err.response.data.errors.username[0]);
-            }
-            if(err.response.data.errors.email){
-                setError(err.response.data.errors.email[0]);
-            }
+            
            
         }
     };

@@ -7,9 +7,12 @@ class CustomerUser(AbstractUser):
     Usuario personalizado del sistema.
     """
     ROLES = (
-        ('admin', 'Administrador'),
+        ('admin_system', 'Administrador del sistema'),
+        ('admin_empresa', 'Administrador de la empresa'),
+        ('admin_sucursal', 'Administrador de la sucursal'),
         ('vendedor', 'Vendedor'),
-        ('cotador', 'Cotador'),
+        ('cotador_empresa', 'Cotador de la empresa'),
+        ('cotador_sucursal', 'Cotador de la sucursal'),
         ('supervisor', 'Supervisor'),
         ('almacenista', 'Almacenista'),
         ('mesero', 'Mesero'),

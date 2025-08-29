@@ -1,128 +1,102 @@
-#user/serializers.py
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from dj_rest_auth.registration.serializers import RegisterSerializer
 from rest_framework import serializers
 from .models import CustomerUser
-from empresas.models import Empresa, Sucursal
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from allauth.account.adapter import get_adapter
+from allauth.account.utils import setup_user_email
+from rest_framework import serializers
+from django.utils.translation import gettext as _
+from django.contrib.auth.password_validation import validate_password
+from .models import CustomerUser
 
+# ------------------------------
+# Serializer para JWT personalizado
+# ------------------------------
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    @classmethod
-    def get_token(cls, user):
-        token = super().get_token(user)
+    """
+    Serializer para obtener el token JWT personalizado.
+    """
+    def validate(self, attrs):
+        data = super().validate(attrs)
 
-        # Add custom claims
-        token['username'] = user.username
-        token['email'] = user.email
+        # Verificar si el usuario tiene una empresa
+        empresa = getattr(self.user, 'empresa', None)
+        if empresa:
+            data['empresa_configurada'] = True
+            data['empresa'] = {
+                'id': empresa.id,
+                'nombre': empresa.nombre,
+            }
+        else:
+            data['empresa_configurada'] = False
+            data['empresa'] = None
+        # Agregar info adicional al payload del token
 
-        token['rol'] = user.rol
-        token['empresa_configurada'] = True if user.empresa else False
-        return token
+        return data
 
+# ------------------------------
+# Serializer para listar/actualizar usuarios
+# ------------------------------
 class CustomerUserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
+    class Meta:
+        model = CustomerUser
+        fields = [
+            'id', 'username', 'email', 'rol', 'empresa_id', 'sucursal_id', 'is_active', 'is_staff'
+        ]
+        read_only_fields = ['id', 'is_staff']
+
+# ------------------------------
+# Serializer para registro con campos extra
+# ------------------------------
+class CustomRegisterSerializer(RegisterSerializer):
+    username = serializers.CharField(required=True)
+    email = serializers.EmailField(required=True)
+    password1 = serializers.CharField(write_only=True, required=True)
+    password2 = serializers.CharField(write_only=True, required=True)
+    empresa_id = serializers.IntegerField(required=True)
+    sucursal_id = serializers.IntegerField(required=False)
+    rol = serializers.CharField(required=True)
 
     class Meta:
         model = CustomerUser
         fields = [
-            'id', 
-            'username', 
-            'email',  
-            'password',
-            'nombre',
-            'apellido_paterno',
-            'apellido_materno',
-            'birthdate',
-            'phone_number',
-            'rol',
-            'empresa',
-            'sucursal', 
-            'is_active', 
-            'fecha_registro'
+            'username', 'email', 'password1', 'password2', 'empresa_id', 'sucursal_id', 'rol'
         ]
-        read_only_fields = ['id', 'fecha_registro']
 
     def validate(self, data):
         """
-        Validar que si hay sucursal, pertenezcan a la empresa
+        Validar que las contraseñas coincidan y cumplan con las políticas de seguridad.
         """
-        empresa = data.get('empresa')
-        sucursal = data.get('sucursal')
+        if data['password1'] != data['password2']:
+            raise serializers.ValidationError({"password": _("Las contraseñas no coinciden.")})
+        validate_password(data['password1'], user=CustomerUser(**data))
+        
+        try:
+            validate_password(data['password1'], user=CustomerUser(**data))
+        except serializers.ValidationError as e:
+            errors = [str(msg) for msg in e]
+            raise serializers.ValidationError({"password": errors})
 
-        if empresa and sucursal:
-            if sucursal.empresa_id != empresa.id:
-                raise serializers.ValidationError(
-                    "La sucursal debe pertenecer a la empresa seleccionada."
-                )
         return data
     
     def create(self, validated_data):
-        """
-        Crear un nuevo usuario con la contraseña encriptada
-        """
-
-        password = validated_data.pop('password')
-
-        if 'rol' not in validated_data:
-            validated_data['rol'] = 'vendedor'
-
-
-        user = CustomerUser(**validated_data)
-        user.set_password(password)
-        user.save()
-        return user
-    
-class CustomerUserRegisterSerializer(serializers.ModelSerializer):
-
-    username = serializers.CharField(
-        max_length=150, 
-        validators=[],
-        )
-    email = serializers.EmailField(
-        max_length=254, 
-        validators=[],
-        )
-    password = serializers.CharField(write_only=True)
-
-    class Meta:
-        model = CustomerUser
-        fields = [
-            'id',
-            'email',
-            'username',
-            'password',
-        ]
-        read_only_fields = ['id']
-
-    def validate_username(self, value):
-        """
-        Validar que el username no esté en uso
-        """
-        if CustomerUser.objects.filter(username=value).exists():
-            raise serializers.ValidationError("El nombre de usuario ya está en uso.")
-
-        return value
-
-    def validate_email(self, value):
-        """
-        Validar que el email no esté en uso
-        """
-        if CustomerUser.objects.filter(email=value).exists():
-            raise serializers.ValidationError("El email ya está en uso.")
-
-        return value
-
-
-    def create(self, validated_data):
-        """
-        Crear un nuevo usuario para registro al pos
-        """
-
         user = CustomerUser(
-            email=validated_data['email'],
             username=validated_data['username'],
+            email=validated_data['email'],
+            empresa_id=validated_data['empresa_id'],
+            sucursal_id=validated_data.get('sucursal_id', None),
+            rol=validated_data['rol']
         )
-        user.set_password(validated_data['password'])
+        user.set_password(validated_data['password1'])
         user.save()
         return user
-    
 
-    
+    def get_cleaned_data(self):
+        """
+        Devuelve los datos limpios para crear el usuario.
+        """
+        data = super().get_cleaned_data()
+        data['empresa_id'] = self.validated_data.get('empresa_id', None)
+        data['sucursal_id'] = self.validated_data.get('sucursal_id', None)
+        data['rol'] = self.validated_data.get('rol', '')
+        return data
