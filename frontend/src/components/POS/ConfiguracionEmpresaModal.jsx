@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Modal, Button, Spinner } from 'react-bootstrap'
 
 
-function ConfiguracionEmpresaModal({onConfiguracionComplete}){
+function ConfiguracionEmpresaModal({onConfiguracionComplete, onConfiguracionCancelada}){
 
     const [show, setShow] = useState(true);
     const [loading, setLoading] = useState(false);
@@ -79,6 +79,9 @@ function ConfiguracionEmpresaModal({onConfiguracionComplete}){
                 </form>
             </Modal.Body>
             <Modal.Footer>
+                <Button variant='secondary' onClick={() => onConfiguracionCancelada()}> 
+                    Cancelar
+                </Button>
                 <Button 
                     variant='primary' 
                     onClick={guardarConfiguracion}

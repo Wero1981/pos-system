@@ -2,13 +2,12 @@
 
 import axios from "axios";
 
-const API_URL = "http://127.0.0.1:8000/api/user/auth";
-const API_URL_CHECK = "http://127.0.0.1:8000/api/user/usuarios";
+const API_URL = "http://127.0.0.1:8000/api/user/";
 
 const AuthServices = {
     // Función para iniciar sesión
     async login(username, password) {
-        const response = await axios.post(`${API_URL}/token/`, {
+        const response = await axios.post(`${API_URL}token/`, {
         username,
         password,
         });
@@ -22,7 +21,7 @@ const AuthServices = {
     // Función para registrar un nuevo usuario
     async register(username, email, password, password2) {
         try {
-            const response = await axios.post(`${API_URL}/registration/`, {
+            const response = await axios.post(`${API_URL}auth/registration/`, {
                 username,
                 email,
                 password1: password,
@@ -48,14 +47,14 @@ const AuthServices = {
     },
     // Función para verificar si un nombre de usuario ya existe
     async checkUsernameExists(username) {
-        const response = await axios.post(`${API_URL_CHECK}/check-username/`, {
+        const response = await axios.post(`${API_URL}usuarios/check-username/`, {
             username
         });
         return response.data.exists;
     },
     // Función para verificar si un email ya existe
     async checkEmailExists(email) {
-        const response = await axios.post(`${API_URL_CHECK}/check-email/`, {
+        const response = await axios.post(`${API_URL}usuarios/check-email/`, {
             email
         });
         return response.data.exists;

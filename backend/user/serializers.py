@@ -68,7 +68,7 @@ class CustomRegisterSerializer(RegisterSerializer):
         Validar que las contraseñas coincidan y cumplan con las políticas de seguridad.
         """
         if data['password1'] != data['password2']:
-            raise serializers.ValidationError({"password": _("Las contraseñas no coinciden.")})
+            raise serializers.ValidationError({"password": ["aaaaaLas contraseñas no coinciden."]})
         validate_password(data['password1'], user=CustomerUser(**data))
         
         try:

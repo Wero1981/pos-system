@@ -37,6 +37,13 @@ function App (){
     setEmpresaConfigurada(true);
     navigate('/pos');
   };
+  const onConfiguracionCancelada = () => {
+    setEmpresaConfigurada(false);
+    setAutenticado(false);
+    localStorage.removeItem('access');
+    localStorage.removeItem('refresh');
+    navigate('/login');
+  }
 
 
   const onRegisterSuccess = () => {
@@ -64,7 +71,7 @@ function App (){
               empresaConfigurada ? (
                 <PuntoVenta />
               ) : (
-                <ConfiguracionEmpresaModal onConfiguracionComplete={onConfiguracionComplete} />
+                <ConfiguracionEmpresaModal onConfiguracionComplete={onConfiguracionComplete} onConfiguracionCancelada={onConfiguracionCancelada} />
               )
             ) : (
               <Navigate to="/login" />

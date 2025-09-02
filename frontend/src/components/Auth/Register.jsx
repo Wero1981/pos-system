@@ -87,8 +87,20 @@ function Register({onRegisterSuccess}){
          onRegisterSuccess();
 
         }catch(err){
+            const resMessage = err.response && err.response.data
+            ? err.response.data.password1 || err.response.data.non_field_errors || err.message
+            : err.message;
+            //console.log("[DEBUG] ERROR EN REGISTRO: ", err.response.data);
+           let mensaje;
+           if(typeof resMessage === 'object'){
+              if(resMessage.length > 1){
+                mensaje = resMessage.join(' ');
+              } else {
+                mensaje = resMessage[0];
+              }
             
-           
+           }
+           setError(mensaje || resMessage);
         }
     };
 
