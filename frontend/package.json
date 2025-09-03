@@ -1,7 +1,8 @@
 {
-  "name": "frontend",
+  "name": "pos-electron",                  
   "version": "0.1.0",
   "private": true,
+  "main": "electron.js",                  
   "dependencies": {
     "@fortawesome/free-brands-svg-icons": "^7.0.0",
     "@fortawesome/free-regular-svg-icons": "^7.0.0",
@@ -23,10 +24,11 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "concurrently \"npm run react-start\" \"wait-on http://localhost:3000 && electron .\"",
+    "react-start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "electron-dev": "electron .",         
+    "electron-build": "electron-builder"
   },
   "eslintConfig": {
     "extends": [
@@ -47,6 +49,28 @@
     ]
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "concurrently": "^9.2.1",
+    "electron": "^37.4.0",
+    "electron-builder": "^26.0.12",
+    "nodemon": "^3.1.10",
+    "wait-on": "^8.0.4"
+  },
+  "build": {                              
+    "appId": "com.tupos.pos",
+    "productName": "POS Desktop",          
+    "files": [
+      "build/**/*",
+      "electron.js",
+      "preload.js"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
   }
 }
