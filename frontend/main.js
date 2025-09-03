@@ -12,22 +12,29 @@ function createWindow() {
     }
   });
 
-  if (app.isPackaged) {
-    // Producción → carga build de React
-    mainWindow.loadFile(path.join(__dirname, 'build', 'index.html'));
-  } else {
-    // Desarrollo → carga el servidor React
+  if (!app.isPackaged) {
     mainWindow.loadURL('http://localhost:3000');
-    mainWindow.webContents.openDevTools(); // opcional
+    mainWindow.webContents.openDevTools();
+  } else {
+    mainWindow.loadFile(path.join(__dirname, 'build', 'index.html'));
   }
+
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
 }
 
+//  usar whenReady en lugar de on('ready')
 app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit();
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
 });
 
 app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  if (mainWindow === null) {
+    createWindow();
+  }
 });

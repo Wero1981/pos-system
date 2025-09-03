@@ -8,6 +8,8 @@ from rest_framework import serializers
 from django.utils.translation import gettext as _
 from django.contrib.auth.password_validation import validate_password
 from .models import CustomerUser
+from rest_framework_simplejwt.tokens import RefreshToken
+
 
 # ------------------------------
 # Serializer para JWT personalizado
@@ -89,7 +91,21 @@ class CustomRegisterSerializer(RegisterSerializer):
         )
         user.set_password(validated_data['password1'])
         user.save()
-        return user
+
+        refresh = RefreshToken.for_user(user)
+        data = {
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+        }
+
+        token_data = CustomTokenObtainPairSerializer.get_token(user)
+        data['empresa_configurada'] = bool(user.empresa)
+        data["empresa"] ={
+            "id": user.empresa.id if user.empresa else None,
+            "nombre": user.empresa.nombre if user.empresa else None,
+        }
+
+        return data
 
     def get_cleaned_data(self):
         """

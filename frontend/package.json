@@ -2,7 +2,7 @@
   "name": "pos-electron",                  
   "version": "0.1.0",
   "private": true,
-  "main": "electron.js",                  
+  "main": "main.js",                  
   "dependencies": {
     "@fortawesome/free-brands-svg-icons": "^7.0.0",
     "@fortawesome/free-regular-svg-icons": "^7.0.0",
