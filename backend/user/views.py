@@ -4,11 +4,14 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
+from dj_rest_auth.registration.views import RegisterView
+
 
 from .models import CustomerUser
 from .serializers import (
     CustomTokenObtainPairSerializer,
-    CustomerUserSerializer
+    CustomerUserSerializer,
+    CustomRegisterSerializer,
 )
 
 # ------------------------------
@@ -33,6 +36,7 @@ class CustomerUserViewSet(viewsets.ModelViewSet):
     serializer_class = CustomerUserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+   
     @action(detail=False, methods=['get'], url_path='perfil')
     def perfil(self, request):
         """
@@ -102,3 +106,16 @@ class UserUpdateView(generics.UpdateAPIView):
     @swagger_auto_schema(operation_description="Obtener el usuario autenticado")
     def get_object(self):
         return self.request.user
+    
+class CustomRegisterView(RegisterView):
+    """
+    Vista personalizada para el registro de usuarios.
+    Utiliza el CustomRegisterSerializer para manejar campos adicionales.
+    """
+    serializer_class = CustomRegisterSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        token_data = serializer.save(request)
+        return Response(token_data, status=status.HTTP_201_CREATED)

@@ -148,6 +148,8 @@ DJ_REST_AUTH = {
     "USE_JWT": True,
     "JWT_AUTH_COOKIE": "access-token",
     "JWT_AUTH_REFRESH_COOKIE": "refresh-token",
+    "REGISTER_SERIALIZER": "user.serializers.CustomRegisterSerializer",
+    "TOKEN_SERIALIZER": "user.serializers.CustomTokenObtainPairSerializer",
 }
 
 # ------------------------------
@@ -155,6 +157,10 @@ DJ_REST_AUTH = {
 # ------------------------------
 REST_AUTH_REGISTER_SERIALIZERS = {
     "REGISTER_SERIALIZER": "user.serializers.CustomRegisterSerializer",
+}
+
+REST_AUTH_SERIALIZERS = {
+    "TOKEN_SERIALIZER": "user.serializers.CustomTokenObtainPairSerializer",
 }
 
 # ------------------------------

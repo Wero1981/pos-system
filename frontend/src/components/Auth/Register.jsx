@@ -88,9 +88,9 @@ function Register({onRegisterSuccess}){
 
         }catch(err){
             const resMessage = err.response && err.response.data
-            ? err.response.data.password1 || err.response.data.non_field_errors || err.message
+            ? err.response.data.password1 || err.response.data.non_field_errors  || err.response.data.username
             : err.message;
-            //console.log("[DEBUG] ERROR EN REGISTRO: ", err.response.data);
+            console.log("[DEBUG] ERROR EN REGISTRO resMessage: ", resMessage);
            let mensaje;
            if(typeof resMessage === 'object'){
               if(resMessage.length > 1){

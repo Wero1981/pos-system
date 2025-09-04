@@ -55,9 +55,9 @@ class CustomRegisterSerializer(RegisterSerializer):
     email = serializers.EmailField(required=True)
     password1 = serializers.CharField(write_only=True, required=True)
     password2 = serializers.CharField(write_only=True, required=True)
-    empresa_id = serializers.IntegerField(required=True)
-    sucursal_id = serializers.IntegerField(required=False)
-    rol = serializers.CharField(required=True)
+    empresa_id = serializers.IntegerField(required=False, allow_null=True)
+    sucursal_id = serializers.IntegerField(required=False, allow_null=True)
+    rol = serializers.CharField(required=False)
 
     class Meta:
         model = CustomerUser
@@ -69,42 +69,46 @@ class CustomRegisterSerializer(RegisterSerializer):
         """
         Validar que las contraseñas coincidan y cumplan con las políticas de seguridad.
         """
+
         if data['password1'] != data['password2']:
             raise serializers.ValidationError({"password": ["aaaaaLas contraseñas no coinciden."]})
-        validate_password(data['password1'], user=CustomerUser(**data))
         
-        try:
-            validate_password(data['password1'], user=CustomerUser(**data))
-        except serializers.ValidationError as e:
-            errors = [str(msg) for msg in e]
-            raise serializers.ValidationError({"password": errors})
+        #Crear instaci dummmy para validar la contraseña
+        temp_user = CustomerUser(
+            username=data['username'],
+            email=data['email']
+        )
+        validate_password(data['password1'], user=temp_user)
 
         return data
-    
-    def create(self, validated_data):
+
+    def save(self, request):
+
+        """
+        Crear el usuario con los datos validados y devolver tokens JWT.
+        """
+
+        cleaned_data = self.get_cleaned_data()
         user = CustomerUser(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            empresa_id=validated_data['empresa_id'],
-            sucursal_id=validated_data.get('sucursal_id', None),
-            rol=validated_data['rol']
+           username=cleaned_data['username'],
+           email=cleaned_data['email'],
+           empresa_id=cleaned_data.get('empresa_id', None),
+           sucursal_id=cleaned_data.get('sucursal_id', None),
+           rol=cleaned_data.get('rol', 'admin_empresa')
         )
-        user.set_password(validated_data['password1'])
+        user.set_password(self.validated_data['password1'])
         user.save()
 
         refresh = RefreshToken.for_user(user)
         data = {
             'access': str(refresh.access_token),
             'refresh': str(refresh),
+            'empreda_configurada': bool(user.empresa),
+            'empresa': {
+                'id': user.empresa.id,
+                'nombre': user.empresa.nombre,
+            } if user.empresa else None
         }
-
-        token_data = CustomTokenObtainPairSerializer.get_token(user)
-        data['empresa_configurada'] = bool(user.empresa)
-        data["empresa"] ={
-            "id": user.empresa.id if user.empresa else None,
-            "nombre": user.empresa.nombre if user.empresa else None,
-        }
-
         return data
 
     def get_cleaned_data(self):
@@ -114,5 +118,6 @@ class CustomRegisterSerializer(RegisterSerializer):
         data = super().get_cleaned_data()
         data['empresa_id'] = self.validated_data.get('empresa_id', None)
         data['sucursal_id'] = self.validated_data.get('sucursal_id', None)
-        data['rol'] = self.validated_data.get('rol', '')
+        data['rol'] = self.validated_data.get('rol', 'admin_empresa')
+        data['password1'] = self.validated_data.get('password1', '')
         return data
