@@ -23,9 +23,15 @@ function LoginForm ({onLogin }){
         e.preventDefault();
               
         try{
-            await AuthServices.login(formData.username, formData.password);
-            onLogin();
-   
+            const response = await AuthServices.login(formData.username, formData.password);
+            console.log("[DEBUG] Respuesta del login:", response);
+            const { access, refresh, empresa_configurada, empresa } = response;
+            localStorage.setItem('access', access);
+            localStorage.setItem('refresh', refresh);
+                
+            // Notificar al componente padre que el inicio de sesión fue exitoso
+            onLogin(empresa_configurada, empresa);
+
         }catch (error) {
             alert("Error en el inicio de sesión. Verifica tus credenciales.");
         }

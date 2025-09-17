@@ -1,11 +1,13 @@
-import axios from 'axios';
+//pos/ConfiguracionEmpresaModal.jsx
 import React from 'react'
 import { useState } from 'react';
 import { Modal, Button, Spinner } from 'react-bootstrap'
+import PosServices from '../../services/PosServices';
 
 
 function ConfiguracionEmpresaModal({onConfiguracionComplete, onConfiguracionCancelada}){
-
+    const [ mensaje, setMensaje] = useState(null);
+    const [ error, setError] = useState(null);
     const [show, setShow] = useState(true);
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -14,7 +16,7 @@ function ConfiguracionEmpresaModal({onConfiguracionComplete, onConfiguracionCanc
     })
 
     const opciones = [
-        {value: 'retails' , label: 'Retail'},
+        {value: 'retail' , label: 'Retail'},
         {value: 'servicios', label: 'Servicios'},
         {value: 'manufactura', label: 'Manufactura'},
         {value: 'distribucion', label : 'Distribucion'},
@@ -23,22 +25,24 @@ function ConfiguracionEmpresaModal({onConfiguracionComplete, onConfiguracionCanc
     ];
     const guardarConfiguracion = async () => {
         setLoading(true);
-        // Aquí podrías hacer una llamada a la API para guardar la configuración
         try{
-            const response = await axios.post(
-                'http://127.0.0.1:8000/api/configuracion/', {
-                    // Aquí debes enviar los datos de configuración
-                    ...formData
-                }, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
-            if (response.status === 200) {
-                setShow(false);
-                onConfiguracionComplete(); // Llama a la función pasada como prop para indicar que la configuración se ha completado
-            }
+            const response = await PosServices.crearEmpresaInicio(formData.nombre, formData.tipo_empresa);
+            console.log("[DEBUG] Empresa creada:", response); 
+            setMensaje('Configuración guardada con éxito.');
+            setError(null);
+            const { nombre, tipo_empresa, id } = response;
+            setLoading(false);
+            setShow(false);
+
+            onConfiguracionComplete(nombre, tipo_empresa, id); // Notificar al componente padre que la configuración se completó
         }catch (error) {
+            if (!error.response) {
+                setError('Error de conexión. Por favor, inténtalo de nuevo más tarde.');
+                setLoading(false);
+                return;
+            }
+            let errorMessage = error.response.data.tipo_empresa[0];
+            setError( errorMessage || 'Error al guardar la configuración de la empresa');
             setLoading(false);
         }
     }
@@ -49,24 +53,35 @@ function ConfiguracionEmpresaModal({onConfiguracionComplete, onConfiguracionCanc
                 <Modal.Title>
                     Configuración inicial requerida
                 </Modal.Title>
+               
             </Modal.Header>
             <Modal.Body>
                 <p>Por Favor completa la informacion de tu empresa para continuar</p>
+                {mensaje && <div className='alert alert-info'>{mensaje}</div>}
+                {error && <div className='alert alert-danger'>{error}</div>}
                 <form>
                     <div className="mb-3">
                         <label htmlFor="nombre" className="form-label">Nombre de la Empresa</label>
                         <input 
                             type="text" 
                             className="form-control" 
-                            id="nombre" 
+                            id="nombre"
+                            name='nombre'
                             placeholder='Mi empresa SA de CV' 
                             value={formData.nombre}
+                            onChange={(e) => setFormData({...formData, nombre: e.target.value})}
                             required />
                     </div>
                     {/* Tipo de empresa */}
                     <div className='mb-3'>
                         <label htmlFor='tipoEmpresa' className='form-label'>Tipo empresa</label>
-                        <select id='tipoEmpresa' value={formData.tipo_empresa} className='form-select' required>
+                        <select 
+                            id='tipoEmpresa' 
+                            name='tipo_empresa' 
+                            value={formData.tipo_empresa}
+                            onChange={(e) => setFormData({...formData, tipo_empresa: e.target.value})}
+                            className='form-select' 
+                            required>
                             <option value=''>Seleccione un tipo</option>
                             {opciones.map(opcion => (
                                 <option key={opcion.value} value={opcion.value}>

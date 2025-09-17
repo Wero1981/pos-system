@@ -1,8 +1,8 @@
 {
-  "name": "pos-electron",                  
+  "name": "pos-electron",
   "version": "0.1.0",
   "private": true,
-  "main": "main.js",                  
+  "main": "main.js",
   "dependencies": {
     "@fortawesome/free-brands-svg-icons": "^7.0.0",
     "@fortawesome/free-regular-svg-icons": "^7.0.0",
@@ -27,7 +27,7 @@
     "start": "concurrently \"npm run react-start\" \"wait-on http://localhost:3000 && electron .\"",
     "react-start": "react-scripts start",
     "build": "react-scripts build",
-    "electron-dev": "electron .",         
+    "electron-dev": "electron .",
     "electron-build": "electron-builder"
   },
   "eslintConfig": {
@@ -55,9 +55,9 @@
     "nodemon": "^3.1.10",
     "wait-on": "^8.0.4"
   },
-  "build": {                              
+  "build": {
     "appId": "com.tupos.pos",
-    "productName": "POS Desktop",          
+    "productName": "POS Desktop",
     "files": [
       "build/**/*",
       "electron.js",

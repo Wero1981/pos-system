@@ -83,8 +83,19 @@ function Register({onRegisterSuccess}){
         try{
          const res = await AuthServices.register(username, email, form.password, form.confirmPassword);
          console.log(res);
-         setMensaje( res.data.message);
-         onRegisterSuccess();
+         if(res && res.data && res.data.message){
+            setMensaje( res.data.message);
+         }else if(res.access){
+            localStorage.setItem('access', res.access);
+            localStorage.setItem('refresh', res.refresh);
+            let empresaConfigurada = res.empresa_configurada;
+
+            console.log("[DEBUG] Empresa configurada (desde register):", empresaConfigurada);
+            onRegisterSuccess(empresaConfigurada);
+                  
+         }
+
+         
 
         }catch(err){
             const resMessage = err.response && err.response.data

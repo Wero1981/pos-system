@@ -12,11 +12,10 @@ const AuthServices = {
         password,
         });
         if (response.data.access) {
-        localStorage.setItem("access", response.data.access);
-        localStorage.setItem("refresh", response.data.refresh);
-        }
         return response.data;
-    },
+    }
+    return response.data;
+},
 
     // Función para registrar un nuevo usuario
     async register(username, email, password, password2) {
@@ -42,6 +41,8 @@ const AuthServices = {
         if (response.data.access) {
             localStorage.setItem("access", response.data.access);
             localStorage.setItem("refresh", response.data.refresh);
+
+
         }
         return response.data;
     },

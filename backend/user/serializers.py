@@ -28,6 +28,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             data['empresa'] = {
                 'id': empresa.id,
                 'nombre': empresa.nombre,
+                'tipo_empresa': empresa.tipo_empresa
             }
         else:
             data['empresa_configurada'] = False
@@ -103,7 +104,7 @@ class CustomRegisterSerializer(RegisterSerializer):
         data = {
             'access': str(refresh.access_token),
             'refresh': str(refresh),
-            'empreda_configurada': bool(user.empresa),
+            'empresa_configurada': bool(user.empresa),
             'empresa': {
                 'id': user.empresa.id,
                 'nombre': user.empresa.nombre,

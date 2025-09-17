@@ -1,0 +1,35 @@
+                 <Row>
+                        {/* Sección izquierda - carrito */}
+                        <Col md={4}>
+                            <Card className="mb-3 shadow-sm">
+                                <Card.Header>
+                                    <h5>Carrito de Compras</h5>
+                                </Card.Header>
+                                <Card.Body>
+                                    <Cart 
+                                        cartItems={cartItems}
+                                        onRemoveItem={onRemoveItem}
+                                        onUpdateQuantity={onUpdateQuantity}
+                                    />
+                                    <h5 className="text-end mt-3">Total: ${total.toFixed(2)}</h5>
+                                    <Button variant="primary" className="w-100 mt-2">Cobrar</Button>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+
+                        {/* Sección derecha - productos */}
+                        <Col md={8}>
+                            <Card className="mb-3 shadow-sm">
+                                <Card.Header>
+                                    <h5>Búsqueda de Productos</h5>
+                                </Card.Header>
+                                <Card.Body>
+                                    <ProductSearch onSearch={handleSearch} />
+                                    <ProductList 
+                                        products={productos} 
+                                        onAddToCart={onAddToCart}
+                                    />
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    </Row>

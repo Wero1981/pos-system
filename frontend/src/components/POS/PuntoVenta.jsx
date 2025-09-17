@@ -5,8 +5,11 @@ import SidebarPOS from './Layout/SidebarPOS';
 import Cart from "./Cart/Cart";
 import ProductSearch from "./Products/ProductSearch";
 import ProductList from "./Products/ProductList";
+import { Outlet } from "react-router-dom";
 
-function PuntoVenta() {
+function PuntoVenta({ dataEmpresa }) {
+    const { nombre, tipo_empresa, configurada, id } = dataEmpresa;
+    console.log("[DEBUG] Datos de la empresa en PuntoVenta:", dataEmpresa);
     const [productos] = useState([
         { name: 'Producto 1', price: 100 },
         { name: 'Producto 2', price: 200 },
@@ -60,43 +63,9 @@ function PuntoVenta() {
         <div className="d-flex">
             <SidebarPOS />
             <div className="flex-grow-1 d-flex flex-column">
-                <HeaderPOS onLogout={handleLogout} />
+                <HeaderPOS nombre_empresa={nombre} onLogout={handleLogout} />
                 <Container fluid className="mt-3">
-                    <Row>
-                        {/* Sección izquierda - carrito */}
-                        <Col md={4}>
-                            <Card className="mb-3 shadow-sm">
-                                <Card.Header>
-                                    <h5>Carrito de Compras</h5>
-                                </Card.Header>
-                                <Card.Body>
-                                    <Cart 
-                                        cartItems={cartItems}
-                                        onRemoveItem={onRemoveItem}
-                                        onUpdateQuantity={onUpdateQuantity}
-                                    />
-                                    <h5 className="text-end mt-3">Total: ${total.toFixed(2)}</h5>
-                                    <Button variant="primary" className="w-100 mt-2">Cobrar</Button>
-                                </Card.Body>
-                            </Card>
-                        </Col>
-
-                        {/* Sección derecha - productos */}
-                        <Col md={8}>
-                            <Card className="mb-3 shadow-sm">
-                                <Card.Header>
-                                    <h5>Búsqueda de Productos</h5>
-                                </Card.Header>
-                                <Card.Body>
-                                    <ProductSearch onSearch={handleSearch} />
-                                    <ProductList 
-                                        products={productos} 
-                                        onAddToCart={onAddToCart}
-                                    />
-                                </Card.Body>
-                            </Card>
-                        </Col>
-                    </Row>
+                    <Outlet />
                 </Container>
             </div>
         </div>

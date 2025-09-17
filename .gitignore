@@ -19,6 +19,8 @@ env/
 
 # MySQL dumps
 *.sql
+db.sqlite3
+*.log
 
 # Node/React/React Native
 node_modules/

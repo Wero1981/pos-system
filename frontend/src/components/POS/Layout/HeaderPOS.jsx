@@ -4,11 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 
-function HeaderPOS({onLogout}) {
+function HeaderPOS({ nombre_empresa, onLogout }) {
     return (
         <Navbar bg="light" expand="lg" className="mb-3 shadow-sm">
             <Container fluid>
-                <Navbar.Brand href="#home">POS System</Navbar.Brand>
+                <Navbar.Brand href="#home">{nombre_empresa}</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav" >
                     <Nav className="me-auto">
