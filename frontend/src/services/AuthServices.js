@@ -26,6 +26,7 @@ const AuthServices = {
                 password1: password,
                 password2: password2
             });
+            console.log("[DEBUG] Registro exitoso:", response);
             return response.data;
         } catch (error) {
             console.error("[DEBUG] Error en registro:", error.request.responseText);

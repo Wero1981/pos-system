@@ -21,10 +21,21 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
 
-        # Verificar si el usuario tiene una empresa
+        # Verificar si el usuario tiene una empresa y sus sucursales
         empresa = getattr(self.user, 'empresa', None)
+
         if empresa:
             data['empresa_configurada'] = True
+            sucursales = self.user.empresa.sucursales.all()
+            if sucursales.exists():
+                data['sucursales'] = [
+                    {
+                        'id': sucursal.id,
+                        'nombre': sucursal.nombre
+                    } for sucursal in sucursales
+                ]
+            else:
+                data['sucursales'] = []
             data['empresa'] = {
                 'id': empresa.id,
                 'nombre': empresa.nombre,

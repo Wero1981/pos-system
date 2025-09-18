@@ -10,6 +10,7 @@ import ConfiguracionEmpresaModal from './components/POS/ConfiguracionEmpresaModa
 import { Route, Routes, Navigate, useNavigate, useLocation} from 'react-router-dom';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App (){
   const [autenticado, setAutenticado] = useState(false);
@@ -20,6 +21,7 @@ function App (){
     configurada: false,
     id: null
   });
+  const [sucursales, setSucursales] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
   const onConfiguracionComplete = (nombre, tipo_empresa, id_empresa, id_sucursal) => {
@@ -59,13 +61,18 @@ function App (){
     navigate('/pos');
   };
 
-  const onLogin = (empresa_configurada, empresa) => {
+  const onLogin = (empresa_configurada, empresa, sucursales) => {
     setAutenticado(true);
     setDataEmpresa(prevData => ({
       ...prevData,
       configurada: empresa_configurada,
-      ...empresa
+      ...empresa,
     }));
+    if(sucursales && sucursales.length > 0){
+      setSucursales(sucursales);
+    }
+    console.log("[DEBUG] Empresa configurada:", empresa_configurada);
+    console.log("[DEBUG] Sucursales:", sucursales);
   }
   /***
    * UsesEfect
@@ -85,7 +92,8 @@ function App (){
             nombre: '',
             tipo_empresa: '',
             configurada: false,
-            id: null
+            id: null,
+            sucursal_id: null
           });
           localStorage.removeItem('access');
           localStorage.removeItem('refresh');
@@ -136,7 +144,7 @@ function App (){
   useEffect(() => {
     const interceptor = axios.interceptors.response.use(
       response => {
-        console.log("INTERCEPTOR AXIOS", response);
+       // console.log("INTERCEPTOR AXIOS", response);
         return response;
       },
       error => {
@@ -197,7 +205,7 @@ function App (){
           }
         >
           <Route path="ventas" element={<Ventas />} />
-          <Route path="inventario" element={<Inventario />} />
+          <Route path="inventario" element={<Inventario  sucursales={sucursales} />} />
           <Route path="reportes" element={<Reportes />} />
           <Route path="configuraciones" element={<Configuraciones />} />
           {/*opcional: ruta por defecto */}

@@ -26,8 +26,7 @@ const ProductosServices = {
     async crearCategoria(nombre, descripcion, sucursal) {
         const response = await axios.post(ENDPOINTS.categorias, {
             nombre,
-            descripcion,
-            sucursal
+            descripcion
         }, AUTHHEADER());
         return response.data;
     },
@@ -58,7 +57,6 @@ const ProductosServices = {
             descripcion,
             precio,
             categoria_id,
-            stock
         }, AUTHHEADER());
         return response.data;
     },

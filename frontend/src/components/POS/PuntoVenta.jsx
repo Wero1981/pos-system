@@ -8,7 +8,7 @@ import ProductList from "./Products/ProductList";
 import { Outlet } from "react-router-dom";
 
 function PuntoVenta({ dataEmpresa }) {
-    const { nombre, tipo_empresa, configurada, id } = dataEmpresa;
+    const { nombre, tipo_empresa, configurada, id, sucursal_id } = dataEmpresa;
     console.log("[DEBUG] Datos de la empresa en PuntoVenta:", dataEmpresa);
     const [productos] = useState([
         { name: 'Producto 1', price: 100 },
@@ -61,7 +61,7 @@ function PuntoVenta({ dataEmpresa }) {
 
     return (
         <div className="d-flex">
-            <SidebarPOS />
+            <SidebarPOS sucursal={id} />
             <div className="flex-grow-1 d-flex flex-column">
                 <HeaderPOS nombre_empresa={nombre} onLogout={handleLogout} />
                 <Container fluid className="mt-3">
