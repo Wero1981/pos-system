@@ -1,4 +1,8 @@
 import React from "react";
+import ProductosServices from "../../services/InventarioServices";
+import "datatables.net-dt/css/jquery.dataTables.css";
+import $ from "jquery"; 
+import "datatables.net";
 
 function Inventario() {
     return(

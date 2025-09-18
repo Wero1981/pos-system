@@ -23,6 +23,7 @@ class Producto(models.Model):
     sucursal = models.ForeignKey(Sucursal, on_delete=models.CASCADE)
     fecha_registro = models.DateTimeField(auto_now_add=True)
     quien_registro = models.CharField(max_length=100, blank=True, null=True)  # Usuario que registró el producto
+    imagen = models.ImageField(upload_to='productos/', blank=True, null=True)   
 
     def __str__(self):
         return f"{self.nombre} ({self.codigo_barras})"

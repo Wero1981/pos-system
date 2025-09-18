@@ -95,9 +95,8 @@ function Register({onRegisterSuccess}){
                   
          }
 
-         
-
         }catch(err){
+            console.log(err);
             const resMessage = err.response && err.response.data
             ? err.response.data.password1 || err.response.data.non_field_errors  || err.response.data.username
             : err.message;

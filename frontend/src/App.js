@@ -22,13 +22,14 @@ function App (){
   });
   const navigate = useNavigate();
   const location = useLocation();
-  const onConfiguracionComplete = (nombre, tipo_empresa, id) => {
+  const onConfiguracionComplete = (nombre, tipo_empresa, id_empresa, id_sucursal) => {
     setDataEmpresa(prevData => ({
       ...prevData,
       configurada: true,
       nombre,
       tipo_empresa,
-      id
+      id: id_empresa,
+      sucursal: id_sucursal
     }));
     setAutenticado(true);
     console.log("[DEBUG] Empresa configurada:", true);
