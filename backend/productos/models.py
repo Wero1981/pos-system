@@ -2,16 +2,18 @@ from django.db import models
 from empresas.models import Sucursal, Empresa
 
 class CategoriaProducto(models.Model):
-    nombre = models.CharField(max_length=100, unique=True)
+    nombre = models.CharField(max_length=100)
     descripcion = models.TextField(blank=True, null=True)
+    empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='categorias')
 
     class Meta:
         verbose_name = "Categoria de Productos"
         verbose_name_plural = "Categorias de Productos"
         ordering = ['nombre']
+        unique_together = ('nombre', 'empresa')  # El nombre debe ser único por empresa
 
     def __str__(self):
-        return f"{self.nombre} - {self.sucursal.nombre}"
+        return f"{self.nombre} - {self.empresa.nombre}"
 
 class Producto(models.Model):
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='productos')

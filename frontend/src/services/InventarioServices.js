@@ -1,12 +1,15 @@
 //services/InventarioServices.js
 
 import axios from "axios";
-const BASE_URL = "http://127.0.0.1:8000/api/productos/";
+const BASE_URL = "http://127.0.0.1:8000/api/";
 const ENDPOINTS = {
-    categorias: `${BASE_URL}categorias/`,
-    productos: `${BASE_URL}productos/`,
-    inventario: `${BASE_URL}inventario/`
+    categorias: `${BASE_URL}productos/categorias/`,
+    productos: `${BASE_URL}productos/productos/`,
+    inventario: `${BASE_URL}productos/inventario/`,
+    sucursales: `${BASE_URL}empresas/sucursales/`,
+    inventario_sucursal: `${BASE_URL}productos/inventario_sucursal/`
 };
+
 
 const AUTHHEADER = () => ({
     headers: {
@@ -93,6 +96,7 @@ const ProductosServices = {
         }, AUTHHEADER());
         return response.data;
     },
+
     // Actualizar un movimiento de inventario
     async actualizarMovimiento(id, producto_id, cantidad, tipo_movimiento, descripcion) {
         const response = await axios.put(`${ENDPOINTS.inventario}${id}/`, {
@@ -103,9 +107,22 @@ const ProductosServices = {
         }, AUTHHEADER());
         return response.data;
     },
+
     // Eliminar un movimiento de inventario
     async eliminarMovimiento(id) {
         const response = await axios.delete(`${ENDPOINTS.inventario}${id}/`, AUTHHEADER());
+        return response.data;
+    },
+
+    // obtener sucursales
+    async obtenerSucursales() {
+        const response = await axios.get(ENDPOINTS.sucursales, AUTHHEADER());
+        return response.data;
+    }
+
+    //obtener inventario por sucursal
+    , async obtenerInventarioPorSucursal(sucursalId) {
+        const response = await axios.get(`${ENDPOINTS.inventario_sucursal}?sucursal_id=${sucursalId}`, AUTHHEADER());
         return response.data;
     }
 };

@@ -11,11 +11,21 @@ class CategoriaProductoSerializer(serializers.ModelSerializer):
 
 # ----------- Inventario por sucursal -----------
 class InventarioSucursalSerializer(serializers.ModelSerializer):
+    producto_nombre = serializers.CharField(source="producto.nombre", read_only=True)
+    producto_codigo = serializers.CharField(source="producto.codigo_barras", read_only=True)
     sucursal_nombre = serializers.CharField(source="sucursal.nombre", read_only=True)
 
     class Meta:
         model = InventarioSucursal
-        fields = ["id", "sucursal", "sucursal_nombre", "stock_actual"]
+        fields = [
+            "id", 
+            "sucursal", 
+            "sucursal_nombre", 
+            "producto", 
+            "producto_nombre", 
+            "producto_codigo",
+            "stock_actual"
+            ]
 
 
 # ----------- Producto -----------
@@ -54,6 +64,7 @@ class ProductoSerializer(serializers.ModelSerializer):
 class MovimientoInventarioSerializer(serializers.ModelSerializer):
     producto_nombre = serializers.CharField(source="inventario.producto.nombre", read_only=True)
     sucursal_nombre = serializers.CharField(source="inventario.sucursal.nombre", read_only=True)
+    sucursal_id = serializers.CharField(source="inventario.sucursal.id", read_only=True)
 
     class Meta:
         model = MovimientoInventario
@@ -62,6 +73,7 @@ class MovimientoInventarioSerializer(serializers.ModelSerializer):
             "inventario",
             "producto_nombre",
             "sucursal_nombre",
+            "sucursal_id",
             "tipo_movimiento",
             "cantidad",
             "fecha_movimiento",

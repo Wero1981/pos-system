@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import AuthServices from '../../services/AuthServices';
-import {Form, Button, Alert, Card, Container} from 'react-bootstrap';
+import {Form, Button, Alert, Card, Container, Spinner} from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
 
@@ -13,7 +13,7 @@ function Register({onRegisterSuccess}){
     });
     const[ mensaje, setMensaje] = useState(null);
     const[error, setError] = useState(null);
-    //const[loading, setLoading] = useState(false);
+    const[loading, setLoading] = useState(false);
 
     const handleChange= e => {
         setForm({
@@ -56,6 +56,7 @@ function Register({onRegisterSuccess}){
     }   
 
     const handleSubmit = async e => {
+        setLoading(true);
         e.preventDefault();
         setError(null);
         setMensaje(null);
@@ -112,6 +113,9 @@ function Register({onRegisterSuccess}){
            }
            setError(mensaje || resMessage);
         }
+        finally{
+            setLoading(false);
+        }
     };
 
     return (
@@ -163,7 +167,22 @@ function Register({onRegisterSuccess}){
                             required />
                     </Form.Group>
 
-                    <Button variant="primary" type="submit">Registrar</Button>
+                    <Button variant="primary" type="submit" className='mt-2'>
+                        {loading ? (
+                                <>
+                                    <Spinner 
+                                        as="span"
+                                        animation="border"
+                                        size="sm"
+                                        role="status"
+                                        aria-hidden="true"
+                                    />
+                                    Guardando...
+                                </>
+                            ) : 
+                                "Registrar"
+                            }
+                    </Button>
                 </Form>
                 <Form.Text className="mt-3">
                     Ya tienes una cuenta? <Link to="/login">Iniciar sesión</Link>

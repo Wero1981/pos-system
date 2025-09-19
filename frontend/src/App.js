@@ -204,7 +204,7 @@ function App (){
           }
         >
           <Route path="ventas" element={<Ventas />} />
-          <Route path="inventario" element={<Inventario  sucursales={sucursales} />} />
+          <Route path="inventario" element={<Inventario />} />
           <Route path="reportes" element={<Reportes />} />
           <Route path="configuraciones" element={<Configuraciones />} />
           {/*opcional: ruta por defecto */}

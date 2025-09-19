@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import AuthServices from '../../services/AuthServices';
-import { Form, Button, Container, Row, Col } from 'react-bootstrap';
+import { Form, Button, Container, Row, Col, Spinner } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
 
 function LoginForm ({onLogin }){
-    
+    const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         username: '',
         password: ''
@@ -20,11 +20,12 @@ function LoginForm ({onLogin }){
     }
 
     const hadleSubmit = async (e) =>{
+        setLoading(true);
         e.preventDefault();
               
         try{
             const response = await AuthServices.login(formData.username, formData.password);
-            console.log("[DEBUG] Respuesta del login:", response);
+            //console.log("[DEBUG] Respuesta del login:", response);
             const { access, refresh, empresa_configurada, empresa, sucursales } = response;
             localStorage.setItem('access', access);
             localStorage.setItem('refresh', refresh);
@@ -34,6 +35,8 @@ function LoginForm ({onLogin }){
 
         }catch (error) {
             alert("Error en el inicio de sesión. Verifica tus credenciales.");
+        }finally{
+            setLoading(false);
         }
     }
 
@@ -61,7 +64,24 @@ function LoginForm ({onLogin }){
                                 onChange={procesarDatos}
                             />
                         </Form.Group>
-                        <Button className='btn btn-primary' type="submit">Entrar</Button>
+                        <Button 
+                            className='btn btn-primary' 
+                            type="submit">
+                            {loading ? (
+                                <>
+                                    <Spinner
+                                        as="span"
+                                        animation="border"
+                                        size="sm"
+                                        role="status"
+                                        aria-hidden="true"
+                                    />
+                                    Entrando...
+                                </>
+                            ) : (
+                                "Entrar"
+                            )}
+                        </Button>
                     </Form>
                     <Form.Text className="mt-3">
                         No tienes una cuenta? <Link to="/register">Registrate</Link>

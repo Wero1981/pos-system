@@ -6,7 +6,8 @@ from user.permissions import RolPermission
 from .serializers import (
     CategoriaProductoSerializer,
     ProductoSerializer,
-    MovimientoInventarioSerializer
+    MovimientoInventarioSerializer,
+    InventarioSucursalSerializer,
 )
 
 class CategoriaProductoViewSet(viewsets.ModelViewSet):
@@ -15,27 +16,25 @@ class CategoriaProductoViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """
-            - admin_empresa ve todas las categorias de su empresa
-            - admin_sucursal, almacenista, vendedor, cajero, mesero, cotador_sucursal, supervisor
-              ven solo las categorias de su sucursal
+            -  todos pueden ver las categorias de la empresa
         """
 
         usuario = self.request.user
-        if usuario.rol == "admin_system":
-            return CategoriaProducto.objects.all()
-        elif usuario.rol == "admin_empresa":
-            return CategoriaProducto.objects.filter(sucursal__empresa=usuario.empresa)
-        elif usuario.sucursal:
-            return CategoriaProducto.objects.filter(sucursal=usuario.sucursal)
-        return CategoriaProducto.objects.none()
-    
+        return CategoriaProducto.objects.filter(empresa=usuario.empresa)
+
     def perform_create(self, serializer):
         """
             Al crear la categoria, se asigna la sucursal del usuario
+            - admin_system no puede crear categorias
+            - admin_empresa y cotador_empresa crean categorias para su empresa
         """
         usuario = self.request.user
-        usuario = usuario.sucursal
-        serializer.save(sucursal=usuario)
+        empresa = usuario.empresa
+
+        if usuario.rol in ['admin_empresa', 'cotador_empresa']:
+            serializer.save(empresa=empresa)
+        else:
+            raise PermissionError("No tienes permiso para crear categorias.")
 
 class ProductoViewSet(viewsets.ModelViewSet):
     serializer_class = ProductoSerializer
@@ -118,3 +117,27 @@ class MovimientoInventarioViewSet(viewsets.ModelViewSet):
             inventario.stock_actual = movimiento.cantidad  # Ajuste directo al valor especificado
 
         inventario.save()
+
+# ----------- Inventario por sucursal -----------
+class InventarioSucursalViewSet(viewsets.ModelViewSet):
+    serializer_class = InventarioSucursalSerializer
+    permission_classes = [IsAuthenticated, RolPermission]
+
+    def get_queryset(self):
+        """
+            filtrar inventario segun el rol:
+            -admin_system ve todo el inventario
+            -admin_empresa y cotador_empresa ven el inventario de su empresa
+            -admin_sucursal, almacenista, vendedor, cajero, mesero, cotador_sucursal, supervisor
+             ven solo el inventario de su sucursal
+        """
+        usuario = self.request.user
+        queryset = InventarioSucursal.objects.all()
+
+        if usuario.rol == "admin_system":
+            return InventarioSucursal.objects.all()
+        elif usuario.rol in ["admin_empresa", "cotador_empresa"]:
+            return InventarioSucursal.objects.filter(sucursal__empresa=usuario.empresa)
+        elif usuario.rol in ["admin_sucursal", "almacenista", "vendedor", "cajero", "mesero", "cotador_sucursal", "supervisor"]:
+            return InventarioSucursal.objects.filter(sucursal=usuario.sucursal)
+        return InventarioSucursal.objects.none()
