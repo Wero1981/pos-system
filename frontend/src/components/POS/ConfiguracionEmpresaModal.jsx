@@ -30,17 +30,18 @@ function ConfiguracionEmpresaModal({onConfiguracionComplete, onConfiguracionCanc
             console.log("[DEBUG] Empresa creada:", response); 
             setMensaje('Configuración guardada con éxito.');
             setError(null);
-            const { id_empresa, id_sucursal, nombre_empresa, tipo_empresa } = response;
+            const { empresa_configurada, empresa, sucursales } = response;
             setLoading(false);
             setShow(false);
 
-            onConfiguracionComplete(nombre_empresa, tipo_empresa, id_empresa, id_sucursal); // Notificar al componente padre que la configuración se completó
+            onConfiguracionComplete(empresa_configurada, empresa, sucursales); // Notificar al componente padre que la configuración se completó
         }catch (error) {
             if (!error.response) {
                 setError('Error de conexión. Por favor, inténtalo de nuevo más tarde.');
                 setLoading(false);
                 return;
-            }
+            }   
+            setLoading(false);
             let errorMessage = error.response.data.tipo_empresa[0];
             setError( errorMessage || 'Error al guardar la configuración de la empresa');
             setLoading(false);

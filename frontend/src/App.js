@@ -24,17 +24,16 @@ function App (){
   const [sucursales, setSucursales] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
-  const onConfiguracionComplete = (nombre, tipo_empresa, id_empresa, id_sucursal) => {
+  const onConfiguracionComplete = (empresa_configurada, empresa, sucursales) => {
     setDataEmpresa(prevData => ({
       ...prevData,
-      configurada: true,
-      nombre,
-      tipo_empresa,
-      id: id_empresa,
-      sucursal: id_sucursal
+      configurada: empresa_configurada,
+      ...empresa,
     }));
+    setSucursales(sucursales);
+    console.log("[DEBUG] Empresa configurada:", empresa_configurada);
+    console.log("[DEBUG] Sucursales:", sucursales);
     setAutenticado(true);
-    console.log("[DEBUG] Empresa configurada:", true);
     navigate('/pos');
   };
   const onConfiguracionCancelada = () => {

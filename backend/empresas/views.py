@@ -26,35 +26,40 @@ class EmpresaViewSet(viewsets.ModelViewSet):
         """
             Crear una sucursal matriz al crear una empresa
         """
+        #1 validar y guardar la empresa
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         empresa = serializer.save()
 
-        # Asignamos empresa  al usuario
+        # 2 Asignar la empresa al usuario
         usuario = request.user
         usuario.empresa = empresa
         usuario.save()
 
+        # 3 Crear la sucursal matriz
         sucursal_matriz = Sucursal.objects.create(
             empresa=empresa,
             nombre="Matriz",
         )
-        sucursal_matriz.save()
+        response_data = {}
+        response_data['empresa'] = {
+            'id': empresa.id,
+            'nombre': empresa.nombre,
+            'tipo_empresa': empresa.get_tipo_empresa_display()
+        }
+        sucursales = usuario.empresa.sucursales.all()
+        if sucursales.exists():
+            response_data['sucursales']=[
+                {
+                    'id': sucursal.id,
+                    'nombre': sucursal.nombre
+                } for sucursal in sucursales
+            ]
 
-        # Retornamos la id_empresa creada id_sucursal, nombre_empresa, tipo_empresa
-        headers = self.get_success_headers(serializer.data)
-        return Response({
-            'empresa': {
-                'id': empresa.id,
-                'nombre': empresa.nombre,
-                'tipo_empresa': empresa.tipo_empresa,
-            },
-            'sucursal': {
-                'id': sucursal_matriz.id,
-                'nombre': sucursal_matriz.nombre,
-            }
-           
-        }, status=status.HTTP_201_CREATED)
+        else:
+            response_data['sucursales'] = []
+        response_data['empresa_configurada'] = True
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
     @swagger_auto_schema(operation_description="Listar y gestionar empresas")
     def list(self, request, *args, **kwargs):

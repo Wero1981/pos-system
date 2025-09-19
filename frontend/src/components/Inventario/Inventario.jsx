@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import ProductosServices from "../../services/InventarioServices";
 import {useTable} from '@tanstack/react-table';
-import { Table, Button, Modal, Form, Spinner, Col, ListGroup, Row } from 'react-bootstrap';
+import { Table, Button, Modal, Form, Spinner, Col, ListGroup, Row, InputGroup } from 'react-bootstrap';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faSave } from "@fortawesome/free-solid-svg-icons";
+import { createColumnHelper, useReactTable, getCoreRowModel, getSortedRowModel, getFilteredRowModel, flexRender } from "@tanstack/react-table";
+
 
 function Inventario( sucursales) {
     const [productos, setProductos] = useState([]);
@@ -13,10 +15,21 @@ function Inventario( sucursales) {
     const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null);
     const sucursalesData = sucursales.sucursales || [];
     const [ sucursalSeleccionada, setSucursalSeleccionada] = useState('');
+    const [busqueda, setBusqueda] = useState('');
 
     //----- Estado para el modal de categoría -----
     const [showCategoriaModal, setShowCategoriaModal] = useState(false);
     console.log("[DEBUG] Sucursales en Inventario:", sucursalesData.length);
+    const productosFiltrados = productos
+    
+    const table = useReactTable({
+        data: productosFiltrados,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+    });
+
 
     return(
         <>
@@ -62,7 +75,42 @@ function Inventario( sucursales) {
                         ))}
                     </ListGroup>
                 </Col>
+                {/* Productos */}
+                <Col md={9}>
+                    <h5>Productos</h5>
+                    <InputGroup className="mb-3">
+                        <Form.Control
+                            placeholder="Buscar producto..."
+                            value={busqueda}
+                            onChange={(e) => setBusqueda(e.target.value)}
+                        />
+                    </InputGroup>
 
+                    <table className="table table-striped">
+                        <thead>
+                            {table.getHeaderGroups().map(headerGroup => (
+                            <tr key={headerGroup.id}>
+                                {headerGroup.headers.map(header => (
+                                <th key={header.id}>
+                                    {flexRender(header.column.columnDef.header, header.getContext())}
+                                </th>
+                                ))}
+                            </tr>
+                            ))}
+                        </thead>
+                        <tbody>
+                            {table.getRowModel().rows.map(row => (
+                            <tr key={row.id}>
+                                {row.getVisibleCells().map(cell => (
+                                <td key={cell.id}>
+                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                </td>
+                                ))}
+                            </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </Col>
                </Row>
             </div>
 
