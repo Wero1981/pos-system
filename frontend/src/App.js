@@ -7,12 +7,14 @@ import Inventario from './components/Inventario/Inventario';
 import Reportes from './components/Contabilidad/Reportes';
 import Configuraciones from './components/Configuraciones/Configuraciones';
 import ConfiguracionEmpresaModal from './components/POS/ConfiguracionEmpresaModal';
+import InventarioSucursal from './components/Inventario/invetarioSucursal';
 import { Route, Routes, Navigate, useNavigate, useLocation} from 'react-router-dom';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App (){
+  
   const [autenticado, setAutenticado] = useState(false);
   //const [empresaConfigurada, setEmpresaConfigurada] = useState(false);
   const [dataEmpresa, setDataEmpresa] = useState({
@@ -204,6 +206,7 @@ function App (){
           }
         >
           <Route path="ventas" element={<Ventas />} />
+          <Route path="inventarioSucursal" element={<InventarioSucursal />} />
           <Route path="inventario" element={<Inventario />} />
           <Route path="reportes" element={<Reportes />} />
           <Route path="configuraciones" element={<Configuraciones />} />

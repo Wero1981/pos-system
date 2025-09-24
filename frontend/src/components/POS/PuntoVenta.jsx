@@ -10,6 +10,11 @@ import { Outlet } from "react-router-dom";
 function PuntoVenta({ dataEmpresa }) {
     const { nombre, tipo_empresa, configurada, id, sucursal_id } = dataEmpresa;
     console.log("[DEBUG] Datos de la empresa en PuntoVenta:", dataEmpresa);
+    const [sidebarCollapse, setSidebarCollapse] = useState(false);
+    const handleToggleSidebar = () => {
+        console.log("[DEBUG] Toggle sidebar");
+        setSidebarCollapse(!sidebarCollapse);
+    }
     const [productos] = useState([
         { name: 'Producto 1', price: 100 },
         { name: 'Producto 2', price: 200 },
@@ -61,9 +66,18 @@ function PuntoVenta({ dataEmpresa }) {
 
     return (
         <div className="d-flex">
-            <SidebarPOS sucursal={id} />
+            <SidebarPOS 
+                sucursal={id} 
+                sidebarCollapse={sidebarCollapse}
+                onToggleSidebar={handleToggleSidebar}
+            />
             <div className="flex-grow-1 d-flex flex-column">
-                <HeaderPOS nombre_empresa={nombre} onLogout={handleLogout} />
+                <HeaderPOS 
+                    nombre_empresa={nombre} 
+                    onLogout={handleLogout}
+                    onToggleSidebar={handleToggleSidebar}
+                    sidebarCollapse={sidebarCollapse}
+                    />
                 <Container fluid className="mt-3">
                     <Outlet />
                 </Container>
