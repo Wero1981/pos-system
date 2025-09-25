@@ -35,43 +35,42 @@ class CategoriaProductoViewSet(viewsets.ModelViewSet):
             serializer.save(empresa=empresa)
         else:
             raise PermissionError("No tienes permiso para crear categorias.")
+        
+    
 
 class ProductoViewSet(viewsets.ModelViewSet):
     serializer_class = ProductoSerializer
     permission_classes = [IsAuthenticated, RolPermission]
 
     def get_queryset(self):
-        """
-            filtrar productos segun el rol:
-            -admin_system ve todos los productos
-            -admin_empresa y cotador_empresa ven los productos de su empresa
-            -admin_sucursal, almacenista, vendedor, cajero, mesero, cotador_sucursal, supervisor
-             ven solo los productos de su sucursal
-        """
         usuario = self.request.user
         if usuario.rol == "admin_system":
             return Producto.objects.all()
-        elif usuario.rol in ["admin_empresa", "cotador_empresa"]:
-            return Producto.objects.filter(sucursal__empresa=usuario.empresa)
+        elif usuario.rol in ["admin_empresa", "cotador_empresa", "almacenista"]:
+            return Producto.objects.filter(empresa=usuario.empresa)
         elif usuario.sucursal:
-            return Producto.objects.filter(sucursal=usuario.sucursal)
+            # CORREGIR: filtrar a través del inventario, no directamente por sucursal
+            return Producto.objects.filter(
+                inventarios__sucursal=usuario.sucursal
+            ).distinct()
         return Producto.objects.none()
 
     def perform_create(self, serializer):
         """
-            Al crear el producto:
-            - Se guarda a la empresa del usuario
-            - se crean inventarios vacios (stock= 0) en todas las sucursales de la empresa
+        Al crear el producto:
+        - Se guarda a la empresa del usuario
+        - se crean inventarios vacíos (stock=0) en todas las sucursales de la empresa
         """
-
         usuario = self.request.user
         empresa = usuario.empresa
+        
+        # Asignar empresa automáticamente al producto
         producto = serializer.save(empresa=empresa, quien_registro=usuario.username)
 
         # Crear inventarios vacíos en todas las sucursales de la empresa
         sucursales = Sucursal.objects.filter(empresa=empresa)
         inventarios = [
-            InventarioSucursal(producto=producto, sucursal=sucursal, stock=0)
+            InventarioSucursal(producto=producto, sucursal=sucursal, stock_actual=0)  # Cambiar 'stock' por 'stock_actual'
             for sucursal in sucursales
         ]
         InventarioSucursal.objects.bulk_create(inventarios)
@@ -82,39 +81,37 @@ class MovimientoInventarioViewSet(viewsets.ModelViewSet):
     permission_classes = [RolPermission]
 
     def get_queryset(self):
-        """
-        Filtra los movimientos de inventario según la sucursal del usuario.
-        - admin_system ve todos los movimientos
-        - admin_empresa y cotador_empresa ven los movimientos de su empresa
-        - admin_sucursal, almacenista, vendedor, cajero, mesero, cotador_sucursal, supervisor
-          ven solo los movimientos de su sucursal
-        """
         usuario = self.request.user
         if usuario.rol in ['admin_system']:
             return MovimientoInventario.objects.all()
         elif usuario.rol in ['admin_empresa', 'cotador_empresa']:
-            return MovimientoInventario.objects.filter(sucursal__empresa=usuario.empresa)
+            # CORREGIR: filtrar a través del inventario
+            return MovimientoInventario.objects.filter(
+                inventario__sucursal__empresa=usuario.empresa
+            )
         elif usuario.rol in ['admin_sucursal', 'almacenista', 'vendedor', 'cajero', 'mesero', 'cotador_sucursal', 'supervisor']:
-            return MovimientoInventario.objects.filter(sucursal=usuario.sucursal)
+            # CORREGIR: filtrar a través del inventario
+            return MovimientoInventario.objects.filter(
+                inventario__sucursal=usuario.sucursal
+            )
         return MovimientoInventario.objects.none()
     
-    def perfom_create(self, serializer):
+
+    def perform_create(self, serializer):  # CAMBIAR: 'perfom_create' por 'perform_create'
         """
-        Al crear un movimiento de inventario, se actualiza el stock en el inventario de la sucursal correspondiente.
+        Al crear un movimiento de inventario, se actualiza el stock.
         """
-        
         usuario = self.request.user
-        sucursal = usuario.sucursal
-        movimiento = serializer.save(sucursal=sucursal)
+        # El inventario debe especificarse en los datos, no asumir la sucursal
+        movimiento = serializer.save()
 
-        inventario = InventarioSucursal.objects.get(sucursal=sucursal, producto=movimiento.producto)
-
+        inventario = movimiento.inventario
         if movimiento.tipo_movimiento == 'entrada':
             inventario.stock_actual += movimiento.cantidad
         elif movimiento.tipo_movimiento == 'salida':
             inventario.stock_actual -= movimiento.cantidad
         elif movimiento.tipo_movimiento == 'ajuste':
-            inventario.stock_actual = movimiento.cantidad  # Ajuste directo al valor especificado
+            inventario.stock_actual = movimiento.cantidad
 
         inventario.save()
 

@@ -26,10 +26,10 @@ const ProductosServices = {
         return response.data;
     },
     // Crear una nueva categoria de producto
-    async crearCategoria(nombre, descripcion, sucursal) {
+    async crearCategoria(formaData) {
         const response = await axios.post(ENDPOINTS.categorias, {
-            nombre,
-            descripcion
+            nombre: formaData.nombre,
+            descripcion: formaData.descripcion
         }, AUTHHEADER());
         return response.data;
     },
@@ -54,12 +54,12 @@ const ProductosServices = {
         return response.data;
     },
     // Crear un nuevo producto
-    async crearProducto(nombre, descripcion, precio, categoria_id, stock) {
+    async crearProducto(formaData) {
         const response = await axios.post(ENDPOINTS.productos, {
-            nombre,
-            descripcion,
-            precio,
-            categoria_id,
+            nombre: formaData.nombre,
+            descripcion: formaData.descripcion,
+            precio_venta: formaData.precio,
+            categoria_id: formaData.categoria_id,
         }, AUTHHEADER());
         return response.data;
     },

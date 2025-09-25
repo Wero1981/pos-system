@@ -58,16 +58,14 @@ function Inventario ({ initialSucursalId = null}){
         const init = async () => {
             setLoading(true);
             try {
-                const s = await InventarioServices.obtenerSucursales();
-                setSucursales(s);
-                if ( !sucursalSeleccionada && s.length > 0) {
-                    setSucursalSeleccionada(s[0].id);
-                }
+                
 
                 const cats = await InventarioServices.obtenerCategorias();
+
                 setCategorias(cats);
 
                 const prods = await InventarioServices.obtenerProductos();
+                console.log("[DEBUG] Productos refrescados:", prods);
                 setProductos(prods);
 
             } catch (error) {
@@ -77,7 +75,7 @@ function Inventario ({ initialSucursalId = null}){
             }
         };
         init();
-    }, [sucursalSeleccionada]);
+    }, []);
 
     //cargar inventario cuando se selecciona una sucursal
     useEffect (() => {
@@ -157,6 +155,7 @@ function Inventario ({ initialSucursalId = null}){
     }
     //guardar categoria
     const handleGuardarCategoria = async () => {
+        //console.log("[DEBUG] Guardar categoria:", formCategoria);
         try {
             await InventarioServices.crearCategoria(formCategoria);
             const cats = await InventarioServices.obtenerCategorias();
@@ -276,6 +275,7 @@ function Inventario ({ initialSucursalId = null}){
             }
             // refrescar productos
             const prods = await InventarioServices.obtenerProductos();
+       
             setProductos(prods);
             if(sucursalSeleccionada){
                 const invs = await InventarioServices.obtenerInventarioPorSucursal(sucursalSeleccionada);
@@ -298,19 +298,6 @@ function Inventario ({ initialSucursalId = null}){
         <div>
            <Row className="mb-3">
                 <Col md={4}>
-                    <h5>Sucursales</h5>
-                    {loading ? <Spinner animation="border" /> : (
-                        <Form.Select value={sucursalSeleccionada || ""} onChange={e => setSucursalSeleccionada(Number(e.target.value))}>
-                            <option value="">---Seleccione una sucursal---</option>
-                            {sucursales.map(sucursal => (
-                                <option key={sucursal.id} value={sucursal.id}>
-                                    {sucursal.nombre}
-                                </option>
-                            ))}
-                        </Form.Select>
-                    )}
-
-                    <hr />
                     <div>
                         <div className="d flex justify-content-between align-items-center mb-2">
                             <h6>Categorias</h6>
@@ -438,7 +425,18 @@ function Inventario ({ initialSucursalId = null}){
                     <Form>
                         <Form.Group className="mb-3">
                             <Form.Label>Nombre</Form.Label>
-                            <Form.Control type="text" value={formCategoria.nombre} onChange={e => setFormCategoria({...formCategoria, nombre: e.target.value})} />
+                            <Form.Control 
+                                type="text" 
+                                value={formCategoria.nombre} 
+                                onChange={e => setFormCategoria({...formCategoria, nombre: e.target.value})} />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Descripción</Form.Label>
+                            <Form.Control 
+                                as="textarea" 
+                                rows={3} 
+                                value={formCategoria.descripcion} 
+                                onChange={e => setFormCategoria({...formCategoria, descripcion: e.target.value})} />
                         </Form.Group>
                     </Form>
                 </Modal.Body>
