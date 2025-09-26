@@ -9,25 +9,62 @@ import {
     faBox,
     faShoppingCart,
     faTags,
-    faChartBar
+    faChartBar,
+    //wrench
+    faWrench,
+    faUserPlus,
+    faStore
 } from '@fortawesome/free-solid-svg-icons';
 
-function SidebarPOS( sidebarCollapse ) {
+function SidebarPOS( { scursal, sidebarCollapse, onToggleSidebar } ) {
+    console.log("[]DEBUG] SidebarPOS - sidebarCollapse:", sidebarCollapse , " type"); 
     const [ configOpen, setConfigOpen ] = useState(false);
   
 
     return(
-        <div 
-            
+        <div      
         className="bg-light p-3 vh-100 border-end"
-            style={{ minWidth: sidebarCollapse ? '60px' : '200px', transition: 'width 0.3s' }}
-            >    
+            style={{ 
+                Width: sidebarCollapse ? '60px' : '200px'
+                , transition: 'width 0.3s ease'
+                , minWidth: sidebarCollapse ? '60px' : '200px'
+                , overflowX: 'hidden'
+             }}
+        >    
             {!sidebarCollapse &&  <h5 className="mb-3" >Menú</h5> }
             <Nav className="flex-column">
-                <NavLink to="/pos/invetarioSucursal" className="nav-link">Inventario Sucursal</NavLink>
-                <NavLink to="/pos/ventas" className="nav-link">Ventas</NavLink>
-                <NavLink to="/pos/inventario" className="nav-link">Catalogos</NavLink>
-                <NavLink to="/pos/reportes" className="nav-link">Reportes</NavLink>
+                <NavLink to="/pos/invetarioSucursal" 
+                        className="nav-link d-flex align-items-center"
+                        title={sidebarCollapse ? 'Inventario Sucursal' : ''}
+                        >
+                        <FontAwesomeIcon icon={faBox} className="me-2" />
+                        {!sidebarCollapse &&<span>Inventario Sucursal</span>}  {/* Espacio entre el icono y el texto */}
+                     
+                </NavLink>
+                <NavLink to="/pos/ventas" 
+                        className="nav-link d-flex align-items-center"
+                        title={sidebarCollapse ? 'Ventas' : ''}
+                        >
+                        <FontAwesomeIcon icon={faShoppingCart} className="me-2" />
+                        {!sidebarCollapse &&<span>Ventas</span>}
+                        
+                </NavLink>
+                <NavLink to="/pos/inventario" 
+                        className="nav-link d-flex align-items-center"
+                        title={sidebarCollapse ? 'Catalogos' : ''}
+                        >
+                        <FontAwesomeIcon icon={faTags} className="me-2" />
+                        {!sidebarCollapse &&<span>Catalogos</span>}
+                        
+                </NavLink>
+                <NavLink to="/pos/reportes" 
+                        className="nav-link d-flex align-items-center"
+                        title={sidebarCollapse ? 'Reportes' : ''}
+                        >
+                        <FontAwesomeIcon icon={faChartBar} className="me-2" />
+                        {!sidebarCollapse &&<span>Reportes</span>}
+                        
+                </NavLink>
                 {/* Configuracion con submenu */}
                 <div>
                     <button
@@ -36,25 +73,37 @@ function SidebarPOS( sidebarCollapse ) {
                         style = {{ textDecoration: 'none', border: 'none', background: 'none'}}
                     >
                         <span>
-                            <FontAwesomeIcon icon={faCog} className="me-2" />
-                            Configuracion
+                            <FontAwesomeIcon icon={faWrench} className="me-2" />
                         </span>
                         <FontAwesomeIcon icon={configOpen ? faChevronDown : faChevronRight} />
                     </button>
                     <Collapse in={configOpen}>
                         {/* Submenu items */}
                         { /*Generales */}
-                        <div>
-                            <NavLink to="/pos/configuraciones/generales" className="nav-link">Generales</NavLink>
+                        <div className="ms-3">
+                            <NavLink 
+                                to="/pos/configuraciones/generales" 
+                                className="nav-link">
+                                    <FontAwesomeIcon icon={faCog} className="me-2" />
+                                    Generales
+                            </NavLink>
                         
-                            <NavLink to="/pos/configuraciones/agregar-usuario" className="nav-link">Agregar Usuario</NavLink>
+                            <NavLink 
+                                to="/pos/configuraciones/agregar-usuario" 
+                                className="nav-link">
+                                    <FontAwesomeIcon icon={faUserPlus} className="me-2" />
+                                    Agregar Usuario
+                            </NavLink>
                        
-                            <NavLink to="/pos/configuraciones/agregar-sucursal" className="nav-link">Agregar Sucursal</NavLink>
+                            <NavLink 
+                                to="/pos/configuraciones/agregar-sucursal" 
+                                className="nav-link">
+                                    <FontAwesomeIcon icon={faStore} className="me-2" />
+                                    Agregar Sucursal
+                            </NavLink>
                         </div>
                     </Collapse>
-                </div>
-                <NavLink to="/pos/configuraciones" className="nav-link">Configuraciones</NavLink>
-                
+                </div> 
             </Nav>
         </div>
     );

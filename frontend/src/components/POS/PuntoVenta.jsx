@@ -10,7 +10,8 @@ import { Outlet } from "react-router-dom";
 function PuntoVenta({ dataEmpresa }) {
     const { nombre, tipo_empresa, configurada, id, sucursal_id } = dataEmpresa;
     console.log("[DEBUG] Datos de la empresa en PuntoVenta:", dataEmpresa);
-    const [sidebarCollapse, setSidebarCollapse] = useState(false);
+    const [sidebarCollapse, setSidebarCollapse] = useState(true);
+
     const handleToggleSidebar = () => {
         console.log("[DEBUG] Toggle sidebar");
         setSidebarCollapse(!sidebarCollapse);
