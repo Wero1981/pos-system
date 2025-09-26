@@ -8,7 +8,6 @@ import {
   getCoreRowModel,
   getSortedRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   flexRender
 } from "@tanstack/react-table";
 import InventarioServices from "../../services/InventarioServices";
@@ -437,6 +436,10 @@ function Inventario ({ initialSucursalId = null}){
                                 rows={3} 
                                 value={formCategoria.descripcion} 
                                 onChange={e => setFormCategoria({...formCategoria, descripcion: e.target.value})} />
+                        </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Descripción</Form.Label>
+                            <Form.Control as="textarea" rows={3} value={formCategoria.descripcion} onChange={e => setFormCategoria({...formCategoria, descripcion: e.target.value})} />
                         </Form.Group>
                     </Form>
                 </Modal.Body>
