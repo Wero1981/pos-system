@@ -12,14 +12,6 @@ function HeaderPOS({ nombre_empresa, onLogout, onToggleSidebar, sidebarCollapse 
                     <FontAwesomeIcon icon={faBars} />
                 </Button>
                 <Navbar.Brand href="#home">{nombre_empresa}</Navbar.Brand>
-                <Navbar.Toggle aria-controls="basic-navbar-nav" />
-                <Navbar.Collapse id="basic-navbar-nav" >
-                    <Nav className="me-auto">
-                        <Nav.Link href="#home">Inicio</Nav.Link>
-                        <Nav.Link href="#features">Características</Nav.Link>
-                        <Nav.Link href="#pricing">Precios</Nav.Link>
-                    </Nav>
-                </Navbar.Collapse>
                 <Button variant="outline-danger" onClick={onLogout}>
                     <FontAwesomeIcon icon={faSignOutAlt} />
                 </Button>

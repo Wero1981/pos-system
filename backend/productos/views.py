@@ -9,6 +9,9 @@ from .serializers import (
     MovimientoInventarioSerializer,
     InventarioSucursalSerializer,
 )
+from django.db.models import Q
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 class CategoriaProductoViewSet(viewsets.ModelViewSet):
     serializer_class = CategoriaProductoSerializer
@@ -44,16 +47,89 @@ class ProductoViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         usuario = self.request.user
+        queryset = None
+        
         if usuario.rol == "admin_system":
-            return Producto.objects.all()
+            queryset = Producto.objects.all()
         elif usuario.rol in ["admin_empresa", "cotador_empresa", "almacenista"]:
-            return Producto.objects.filter(empresa=usuario.empresa)
+            queryset = Producto.objects.filter(empresa=usuario.empresa)
         elif usuario.sucursal:
-            # CORREGIR: filtrar a través del inventario, no directamente por sucursal
-            return Producto.objects.filter(
+            queryset = Producto.objects.filter(
                 inventarios__sucursal=usuario.sucursal
             ).distinct()
-        return Producto.objects.none()
+        else:
+            queryset = Producto.objects.none()
+        
+        # ✅ AGREGAR: Filtros por parámetros
+        categoria_id = self.request.query_params.get('categoria', None)
+        search = self.request.query_params.get('search', None)
+        
+        if categoria_id and categoria_id != 'todas':
+            queryset = queryset.filter(categoria_id=categoria_id)
+            
+        if search:
+            queryset = queryset.filter(
+                Q(nombre__icontains=search) |
+                Q(descripcion__icontains=search) |
+                Q(codigo_barras__icontains=search)
+            )
+        
+        return queryset.select_related('categoria', 'empresa').order_by('nombre')
+
+    # ✅ AGREGAR: Endpoint específico para buscar
+    @action(detail=False, methods=['get'])
+    def buscar(self, request):
+        """
+        Endpoint para búsqueda avanzada de productos
+        Parámetros: categoria, search, limit
+        """
+        categoria_id = request.query_params.get('categoria', None)
+        search = request.query_params.get('search', None)
+        limit = request.query_params.get('limit', None)
+        
+        queryset = self.filter_queryset(self.get_queryset())
+        
+        if categoria_id and categoria_id != 'todas':
+            queryset = queryset.filter(categoria_id=categoria_id)
+            
+        if search:
+            queryset = queryset.filter(
+                Q(nombre__icontains=search) |
+                Q(descripcion__icontains=search) |
+                Q(codigo_barras__icontains=search)
+            )
+        
+        if limit:
+            queryset = queryset[:int(limit)]
+            
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({
+            'results': serializer.data,
+            'count': queryset.count()
+        })
+
+    # ✅ AGREGAR: Endpoint para productos por categoría
+    @action(detail=False, methods=['get'])
+    def por_categoria(self, request):
+        """
+        Obtener productos por categoría específica
+        """
+        categoria_id = request.query_params.get('categoria_id')
+        if not categoria_id:
+            return Response({'error': 'categoria_id es requerido'}, status=400)
+            
+        queryset = self.filter_queryset(self.get_queryset())
+        
+        if categoria_id == 'todas':
+            # Todos los productos
+            productos = queryset
+        else:
+            # Productos de categoría específica
+            productos = queryset.filter(categoria_id=categoria_id)
+            
+        serializer = self.get_serializer(productos, many=True)
+        return Response(serializer.data)
+
 
     def perform_create(self, serializer):
         """

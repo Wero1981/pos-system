@@ -58,7 +58,8 @@ const ProductosServices = {
         const response = await axios.post(ENDPOINTS.productos, {
             nombre: formaData.nombre,
             descripcion: formaData.descripcion,
-            precio_venta: formaData.precio,
+            costo: formaData.costo,
+            precio_venta: formaData.precio_venta,
             categoria_id: formaData.categoria_id,
         }, AUTHHEADER());
         return response.data;

@@ -1,0 +1,76 @@
+/* Sidebar base */
+.sidebar {
+  background-color: #f8f9fa;
+  height: 100vh;
+  border-right: 1px solid #dee2e6;
+  overflow-x: hidden;
+  transition: width 0.3s ease-in-out;
+}
+
+.sidebar-expanded {
+  width: 200px;
+  min-width: 200px;
+}
+
+.sidebar-collapsed {
+  width: 50px;
+  min-width: 50px;
+}
+
+/* Textos de menú */
+.sidebar .nav-link span {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+/* Cuando está colapsado, ocultar texto como en AdminLTE */
+.sidebar-collapsed .nav-link span {
+  opacity: 0;
+  transform: translateX(-20px);
+  pointer-events: none;
+}
+
+/* Título del sidebar */
+.sidebar-title span {
+  display: inline-block;
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.25s ease-in-out, transform 0.25s ease-in-out;
+}
+
+.sidebar-collapsed .sidebar-title span {
+  opacity: 1;
+  transform: translateX(-20px);
+
+}
+
+/* Íconos siempre visibles */
+.sidebar .nav-link svg {
+  flex-shrink: 0;
+  font-size: 1rem;
+  transition: margin-right 0.2s ease-in-out;
+}
+
+/* Cuando colapsa, reducimos el margen del ícono */
+.sidebar-collapsed .nav-link svg {
+  margin-right: 0;
+}
+
+.sidebar-logo {
+  height: 60px; /* altura fija como en AdminLTE */
+  transition: all 0.3s ease;
+}
+
+.sidebar-logo.collapsed {
+  justify-content: center; /* centra la "P" */
+  align-items: center;
+}
+
+.sidebar-logo.expanded {
+  justify-content: center; /* o start si lo prefieres alineado */
+  align-items: center;
+}

@@ -53,11 +53,17 @@ class ProductoSerializer(serializers.ModelSerializer):
             "inventarios",
         ]
 
+        read_only_fields = ["empresa", "fecha_registro", "quien_registro", "inventarios"]
+
     def get_imagen_url(self, obj):
         request = self.context.get("request")
         if obj.imagen and request:
             return request.build_absolute_uri(obj.imagen.url)
         return None
+
+    def create(self, validated_data):
+        # Lógica para crear un nuevo producto
+        return super().create(validated_data)
 
 
 # ----------- Movimiento Inventario -----------

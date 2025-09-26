@@ -15,98 +15,88 @@ import {
     faUserPlus,
     faStore
 } from '@fortawesome/free-solid-svg-icons';
+import '../../../cssPropios/SIdebar.css';
 
-function SidebarPOS( { scursal, sidebarCollapse, onToggleSidebar } ) {
-    console.log("[]DEBUG] SidebarPOS - sidebarCollapse:", sidebarCollapse , " type"); 
-    const [ configOpen, setConfigOpen ] = useState(false);
-  
+function SidebarPOS({ scursal, sidebarCollapse, onToggleSidebar }) {
+  const [configOpen, setConfigOpen] = useState(false);
+  const [isHover, setIsHover] = useState(false);
 
-    return(
-        <div      
-        className="bg-light p-3 vh-100 border-end"
-            style={{ 
-                Width: sidebarCollapse ? '60px' : '200px'
-                , transition: 'width 0.3s ease'
-                , minWidth: sidebarCollapse ? '60px' : '200px'
-                , overflowX: 'hidden'
-             }}
-        >    
-            {!sidebarCollapse &&  <h5 className="mb-3" >Menú</h5> }
-            <Nav className="flex-column">
-                <NavLink to="/pos/invetarioSucursal" 
-                        className="nav-link d-flex align-items-center"
-                        title={sidebarCollapse ? 'Inventario Sucursal' : ''}
-                        >
-                        <FontAwesomeIcon icon={faBox} className="me-2" />
-                        {!sidebarCollapse &&<span>Inventario Sucursal</span>}  {/* Espacio entre el icono y el texto */}
-                     
-                </NavLink>
-                <NavLink to="/pos/ventas" 
-                        className="nav-link d-flex align-items-center"
-                        title={sidebarCollapse ? 'Ventas' : ''}
-                        >
-                        <FontAwesomeIcon icon={faShoppingCart} className="me-2" />
-                        {!sidebarCollapse &&<span>Ventas</span>}
-                        
-                </NavLink>
-                <NavLink to="/pos/inventario" 
-                        className="nav-link d-flex align-items-center"
-                        title={sidebarCollapse ? 'Catalogos' : ''}
-                        >
-                        <FontAwesomeIcon icon={faTags} className="me-2" />
-                        {!sidebarCollapse &&<span>Catalogos</span>}
-                        
-                </NavLink>
-                <NavLink to="/pos/reportes" 
-                        className="nav-link d-flex align-items-center"
-                        title={sidebarCollapse ? 'Reportes' : ''}
-                        >
-                        <FontAwesomeIcon icon={faChartBar} className="me-2" />
-                        {!sidebarCollapse &&<span>Reportes</span>}
-                        
-                </NavLink>
-                {/* Configuracion con submenu */}
-                <div>
-                    <button
-                        className="btn btn-link nav-link text-start w-100 d-flex justify-content-between align-items-center"
-                        onClick={() => setConfigOpen(!configOpen)}
-                        style = {{ textDecoration: 'none', border: 'none', background: 'none'}}
-                    >
-                        <span>
-                            <FontAwesomeIcon icon={faWrench} className="me-2" />
-                        </span>
-                        <FontAwesomeIcon icon={configOpen ? faChevronDown : faChevronRight} />
-                    </button>
-                    <Collapse in={configOpen}>
-                        {/* Submenu items */}
-                        { /*Generales */}
-                        <div className="ms-3">
-                            <NavLink 
-                                to="/pos/configuraciones/generales" 
-                                className="nav-link">
-                                    <FontAwesomeIcon icon={faCog} className="me-2" />
-                                    Generales
-                            </NavLink>
-                        
-                            <NavLink 
-                                to="/pos/configuraciones/agregar-usuario" 
-                                className="nav-link">
-                                    <FontAwesomeIcon icon={faUserPlus} className="me-2" />
-                                    Agregar Usuario
-                            </NavLink>
-                       
-                            <NavLink 
-                                to="/pos/configuraciones/agregar-sucursal" 
-                                className="nav-link">
-                                    <FontAwesomeIcon icon={faStore} className="me-2" />
-                                    Agregar Sucursal
-                            </NavLink>
-                        </div>
-                    </Collapse>
-                </div> 
-            </Nav>
+  const shouldShowExpanded = !sidebarCollapse || isHover;
+
+  return (
+    <div
+      className={`sidebar ${shouldShowExpanded ? "sidebar-expanded" : "sidebar-collapsed"}`}
+      onMouseEnter={() => setIsHover(true)}
+      onMouseLeave={() => setIsHover(false)}
+    >
+      <div
+        className={`sidebar-logo d-flex justify-content-center align-items-center ${
+          shouldShowExpanded ? "expanded" : "collapsed"
+        }`}
+      >
+        <h6 className="m-0">
+          {shouldShowExpanded ? "Punto de venta" : "P"}
+        </h6>
+      </div>
+      <Nav className="flex-column">
+        <NavLink to="/pos/inventarioSucursal" className="nav-link d-flex align-items-center">
+          <FontAwesomeIcon icon={faBox} className="me-2" />
+          <span>Inventario</span>
+        </NavLink>
+
+        <NavLink to="/pos/ventas" className="nav-link d-flex align-items-center">
+          <FontAwesomeIcon icon={faShoppingCart} className="me-2" />
+          <span>Ventas</span>
+        </NavLink>
+
+        <NavLink to="/pos/catalogo" className="nav-link d-flex align-items-center">
+          <FontAwesomeIcon icon={faTags} className="me-2" />
+          <span>Catálogos</span>
+        </NavLink>
+
+        <NavLink to="/pos/reportes" className="nav-link d-flex align-items-center">
+          <FontAwesomeIcon icon={faChartBar} className="me-2" />
+          <span>Reportes</span>
+        </NavLink>
+
+        <div>
+            <button
+                className="btn btn-link nav-link text-start w-100 d-flex justify-content-between align-items-center"
+                onClick={() => setConfigOpen(!configOpen)}
+                style={{ textDecoration: "none", border: "none", background: "none" }}
+                >
+                <div className="d-flex align-items-center">
+                    <FontAwesomeIcon icon={faWrench} className="me-2" />
+                    <span>Configuración</span>
+                </div>
+                {shouldShowExpanded && (
+                    <FontAwesomeIcon icon={configOpen ? faChevronDown : faChevronRight} />
+                )}
+            </button>
+
+          <Collapse in={configOpen}>
+            <div className="ms-3 sidebar-submenu">
+              <NavLink to="/pos/configuraciones/generales" className="nav-link">
+                <FontAwesomeIcon icon={faCog} className="me-2" />
+                <span>Generales</span>
+              </NavLink>
+
+              <NavLink to="/pos/configuraciones/agregar-usuario" className="nav-link">
+                <FontAwesomeIcon icon={faUserPlus} className="me-2" />
+                <span>Agregar Usuario</span>
+              </NavLink>
+
+              <NavLink to="/pos/configuraciones/agregar-sucursal" className="nav-link">
+                <FontAwesomeIcon icon={faStore} className="me-2" />
+                <span>Agregar Sucursal</span>
+              </NavLink>
+            </div>
+          </Collapse>
         </div>
-    );
+      </Nav>
+    </div>
+  );
 }
+
 
 export default SidebarPOS;

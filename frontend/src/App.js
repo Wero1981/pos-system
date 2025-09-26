@@ -7,6 +7,7 @@ import Inventario from './components/Inventario/Inventario';
 import Reportes from './components/Contabilidad/Reportes';
 import Configuraciones from './components/Configuraciones/Configuraciones';
 import ConfiguracionEmpresaModal from './components/POS/ConfiguracionEmpresaModal';
+import Catalogo from './components/POS/Products/Catalogo';
 import InventarioSucursal from './components/Inventario/invetarioSucursal';
 import { Route, Routes, Navigate, useNavigate, useLocation} from 'react-router-dom';
 import axios from 'axios';
@@ -210,6 +211,7 @@ function App (){
           <Route path="inventario" element={<Inventario />} />
           <Route path="reportes" element={<Reportes />} />
           <Route path="configuraciones" element={<Configuraciones />} />
+          <Route path="catalogo" element={<Catalogo />} />
           {/*opcional: ruta por defecto */}
           <Route index element={<Ventas />} />
         </Route>
