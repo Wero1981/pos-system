@@ -68,7 +68,7 @@ const BuscadorDeImagenes = ({ show, onHide, onSelectImage, nombreProducto }) => 
     }
 
     React.useEffect(() => {
-                    console.log("[DEBUG] useEffect1 show o nombreProducto cambió:", show, nombreProducto, nombreProducto.trim());
+            console.log("[DEBUG] useEffect1 show o nombreProducto cambió:", show, nombreProducto, nombreProducto.trim());
 
         if(show && nombreProducto && nombreProducto.trim()) {
             console.log("[DEBUG] useEffect2 show o nombreProducto cambió:", show, nombreProducto, nombreProducto.trim());
@@ -92,11 +92,11 @@ const BuscadorDeImagenes = ({ show, onHide, onSelectImage, nombreProducto }) => 
                         placeholder="Buscar imágenes..." 
                         value={query} 
                         onChange={e => setQuery(e.target.value)}
-                        onKeyPress={e => { if(e.key === 'Enter') manejarBusqueda(); }}
                     />
                     <Button 
                         variant="primary" 
-                        type="submit" 
+                        type="submit"
+                        onClick={manejarBusqueda}
                         disabled={cargando}>
                         {cargando ? <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" /> : "Buscar"}
                     </Button>
