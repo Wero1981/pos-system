@@ -16,6 +16,16 @@ class CategoriaProducto(models.Model):
         return f"{self.nombre} - {self.empresa.nombre}"
 
 class Producto(models.Model):
+    #Opciones de unidada de medida
+    UNIDAD_PZA =  'PZA'
+    UNIDAD_PESO = 'PESO'
+    UNIDAD_LITRO = 'LITRO'
+
+    UNIDAD_OPCIONES = [
+        (UNIDAD_PZA, 'Pieza / Unidad'),
+        (UNIDAD_PESO, 'Peso (e.g.,  Kg, gr, lb, oz)'),
+        (UNIDAD_LITRO, 'Litros (e.g., Lt, ml)'),
+    ]
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='productos')
     nombre = models.CharField(max_length=255)
     descripcion = models.TextField(blank=True, null=True)
@@ -25,8 +35,14 @@ class Producto(models.Model):
     categoria = models.ForeignKey(CategoriaProducto, on_delete=models.SET_NULL, null=True, blank=True)
     fecha_registro = models.DateTimeField(auto_now_add=True)
     quien_registro = models.CharField(max_length=100, blank=True, null=True)  # Usuario que registró el producto
-    imagen = models.ImageField(upload_to='productos/', blank=True, null=True)   
+    imagen_url = models.URLField(max_length=500, blank=True, null=True)
 
+    unidad_medida = models.CharField(
+        max_length=10, 
+        choices=UNIDAD_OPCIONES, 
+        default=UNIDAD_PZA,
+        verbose_name="Unidad de Medida"
+        )
     def __str__(self):
         return f"{self.nombre} ({self.codigo_barras})"
     

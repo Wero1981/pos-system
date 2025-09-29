@@ -32,13 +32,12 @@ class InventarioSucursalSerializer(serializers.ModelSerializer):
 class ProductoSerializer(serializers.ModelSerializer):
     categoria_nombre = serializers.CharField(source="categoria.nombre", read_only=True)
     inventarios = InventarioSucursalSerializer(many=True, read_only=True)
-    imagen_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Producto
         fields = [
             "id",
-            "empresa",
+            #"empresa",
             "nombre",
             "descripcion",
             "codigo_barras",
@@ -48,18 +47,24 @@ class ProductoSerializer(serializers.ModelSerializer):
             "categoria_nombre",
             "fecha_registro",
             "quien_registro",
-            "imagen",
             "imagen_url",
+            "unidad_medida",
             "inventarios",
         ]
 
-        read_only_fields = ["empresa", "fecha_registro", "quien_registro", "inventarios"]
+        read_only_fields = ["empresa", "fecha_registro", "quien_registro"]
 
     def get_imagen_url(self, obj):
+        """
+        Obtener URL completa de la imagen del producto
+        """
         request = self.context.get("request")
         if obj.imagen and request:
             return request.build_absolute_uri(obj.imagen.url)
         return None
+    
+
+    
 
     def create(self, validated_data):
         # Lógica para crear un nuevo producto

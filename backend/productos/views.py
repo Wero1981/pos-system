@@ -48,10 +48,13 @@ class ProductoViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         usuario = self.request.user
         queryset = None
-        
+        print("[DEBUG] mensaje", "Usuario:", usuario.username, "Rol:", usuario.rol)
+        print("[DEBUG] categoria_id", self.request.query_params.get('categoria', None))
+
         if usuario.rol == "admin_system":
             queryset = Producto.objects.all()
         elif usuario.rol in ["admin_empresa", "cotador_empresa", "almacenista"]:
+            print("[DEBUG] mensaje", "Filtrando por empresa:", usuario.empresa)
             queryset = Producto.objects.filter(empresa=usuario.empresa)
         elif usuario.sucursal:
             queryset = Producto.objects.filter(
@@ -60,14 +63,18 @@ class ProductoViewSet(viewsets.ModelViewSet):
         else:
             queryset = Producto.objects.none()
         
-        # ✅ AGREGAR: Filtros por parámetros
-        categoria_id = self.request.query_params.get('categoria', None)
+        # AGREGAR: Filtros por parámetros
+
+        categoria = self.request.query_params.get('categoria', None)
+        print("[DEBUG] Buscar por categoria:", categoria)
         search = self.request.query_params.get('search', None)
-        
-        if categoria_id and categoria_id != 'todas':
-            queryset = queryset.filter(categoria_id=categoria_id)
+
+        if categoria and categoria != 'todas':
+            print("[DEBUG] Filtrando por categoria:", categoria )
+            queryset = queryset.filter(categoria=categoria)
             
         if search:
+            print("[DEBUG] Filtrando por search:", search)
             queryset = queryset.filter(
                 Q(nombre__icontains=search) |
                 Q(descripcion__icontains=search) |
@@ -139,7 +146,8 @@ class ProductoViewSet(viewsets.ModelViewSet):
         """
         usuario = self.request.user
         empresa = usuario.empresa
-        
+        print("[DEBUG] imprimir lo que se va a guardar:", serializer.validated_data)
+
         # Asignar empresa automáticamente al producto
         producto = serializer.save(empresa=empresa, quien_registro=usuario.username)
 

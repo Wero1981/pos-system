@@ -13,6 +13,7 @@ import {
 
 import InventarioServices from "../../../services/InventarioServices";
 import ProductosServicesCategorias from "../../../services/ProductoServices";
+import BuscadorDeImagenes from "./BuscadorDeImagenes";
 
 const  PAGE_SIZE = 10;
 
@@ -37,8 +38,14 @@ function Catalogo (){
         precio_venta: 0,
         costo: 0,
         categoria_id: "",
-        imagen: null,
+        unidad_medida: "pza",
+        imagen_url: null,
     });
+
+    //Estados para la busdqueda de imagenges
+    const [showBuscadorImagenes, setShowBuscadorImagenes] = useState(false);
+    const [imagenSeleccionada, setImagenSeleccionada] = useState(null);
+    const [previewImagenUrl, setPreviewImagenUrl] = useState("");
 
     //Modal Crear Categoria
     const [showModalCategoria, setShowModalCategoria] = useState(false);
@@ -142,7 +149,7 @@ function Catalogo (){
             header: "Código",
             cell: ({ getValue }) => getValue() || "Sin código"
         }),
-        columnHelper.accessor('categoria.nombre', {
+        columnHelper.accessor('categoria_nombre', {
             id: "categoria",
             header: "Categoría",
             cell: ({ getValue }) => getValue() || "Sin categoría"
@@ -286,6 +293,32 @@ function Catalogo (){
             await cargarProductosPorCategoria("todas");
         }
     };
+
+    const handleSeleccionarImagen = (file, url) => {
+        setImagenSeleccionada(file);
+        setPreviewImagenUrl(url);
+        setFormProducto({...formProducto, imagen: file});
+        console.log("[DEBUG] Imagen seleccionada:", file);
+    };
+
+    const abrirBuscadorImagenes = () => {
+        console.log("[DEBUG] Abrir buscador de imágenes para:", formProducto.nombre);
+        setShowBuscadorImagenes(true);
+    };
+
+    const resetFormulario = () => {
+        setFormProducto({
+            nombre: "",
+            descripcion: "",
+            precio_venta: 0,
+            costo: 0,
+            categoria_id: "",
+            imagen: null,
+        });
+        setImagenSeleccionada(null);
+        setPreviewImagenUrl("");
+    };
+
 
 
     const totalPages = Math.max(1, Math.ceil(dataFiltered.length / PAGE_SIZE));
@@ -454,14 +487,34 @@ function Catalogo (){
                             <Form.Label>Descripción</Form.Label>
                             <Form.Control as="textarea" rows={3} value={formProducto.descripcion} onChange={e => setFormProducto({...formProducto, descripcion: e.target.value})} />
                         </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Precio de Venta</Form.Label>
-                            <Form.Control type="number" value={formProducto.precio_venta} onChange={e => setFormProducto({...formProducto, precio_venta: Number(e.target.value)})} />
-                        </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Costo</Form.Label>
-                            <Form.Control type="number" value={formProducto.costo} onChange={e => setFormProducto({...formProducto, costo: Number(e.target.value)})} />
-                        </Form.Group>
+                        <Row>
+                            <Col md={4}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Precio de Venta</Form.Label>
+                                    <Form.Control type="number" value={formProducto.precio_venta} onChange={e => setFormProducto({...formProducto, precio_venta: Number(e.target.value)})} />
+                                </Form.Group>
+                            </Col>
+                            <Col md={4}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Costo</Form.Label>
+                                    <Form.Control type="number" value={formProducto.costo} onChange={e => setFormProducto({...formProducto, costo: Number(e.target.value)})} />
+                                </Form.Group>
+                            </Col>
+                            <Col md={4}>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Unidad de Medida</Form.Label>
+                                    <Form.Select 
+                                        value={formProducto.unidad_medida} 
+                                        onChange={e => setFormProducto({...formProducto, unidad_medida: e.target.value})}
+                                    >
+                                        <option value="">--Seleccione una unidad--</option>
+                                        <option value="pza">Pieza (pza)</option>
+                                        <option value="peso">Peso (peso)</option>
+                                        <option value="lt">Litro (lt)</option>
+                                    </Form.Select>
+                                </Form.Group>
+                            </Col>
+                        </Row>
                         <Form.Group className="mb-3">
                             <Form.Label>Categoría</Form.Label>
                             <Form.Select value={formProducto.categoria_id} onChange={e => setFormProducto({...formProducto, categoria_id: e.target.value})}>
@@ -471,9 +524,59 @@ function Catalogo (){
                                 ))}
                             </Form.Select>
                         </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Imagen</Form.Label>
-                            <Form.Control type="file" onChange={e => setFormProducto({...formProducto, imagen: e.target.files[0]})} />
+                       
+                         <Form.Group className="mb-3">
+                            <Form.Label>Imagen del Producto</Form.Label>
+                            
+                            {/* Preview de imagen */}
+                            {previewImagenUrl && (
+                                <div className="mb-3">
+                                    <Image 
+                                        src={previewImagenUrl} 
+                                        thumbnail 
+                                        style={{ maxWidth: '200px', maxHeight: '200px' }}
+                                    />
+                                    <Button 
+                                        variant="outline-danger" 
+                                        size="sm" 
+                                        className="ms-2"
+                                        onClick={() => {
+                                            setPreviewImagenUrl("");
+                                            setImagenSeleccionada(null);
+                                            setFormProducto({...formProducto, imagen: null});
+                                        }}
+                                    >
+                                        ✕ Quitar
+                                    </Button>
+                                </div>
+                            )}
+                            
+                            <div className="d-flex gap-2">
+                                <Form.Control 
+                                    type="file" 
+                                    accept="image/*"
+                                    onChange={e => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                            setFormProducto({...formProducto, imagen: file});
+                                            setPreviewImagenUrl(URL.createObjectURL(file));
+                                        }
+                                    }} 
+                                />
+                                <Button 
+                                    variant="outline-primary"
+                                    onClick={abrirBuscadorImagenes}
+                                    disabled={!formProducto.nombre.trim()}
+                                >
+                                    🔍 Buscar Online
+                                </Button>
+                            </div>
+                            
+                            {!formProducto.nombre.trim() && (
+                                <Form.Text className="text-muted">
+                                    Ingresa el nombre del producto para buscar imágenes online
+                                </Form.Text>
+                            )}
                         </Form.Group>
                     </Form>
                 </Modal.Body>
@@ -513,6 +616,14 @@ function Catalogo (){
                     <Button variant="primary" onClick={handleGuardarCategoria}>Guardar</Button>
                 </Modal.Footer>
             </Modal>
+
+             <BuscadorDeImagenes
+                show={showBuscadorImagenes}
+                onHide={() => setShowBuscadorImagenes(false)}
+                onSelectImage={handleSeleccionarImagen}
+                nombreProducto={formProducto.nombre}
+            />
+
         </div>
     );
 }

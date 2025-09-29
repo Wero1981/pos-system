@@ -60,18 +60,22 @@ const ProductosServices = {
             descripcion: formaData.descripcion,
             costo: formaData.costo,
             precio_venta: formaData.precio_venta,
-            categoria_id: formaData.categoria_id,
+            categoria: formaData.categoria_id,
+            unidad_medida: formaData.unidad_medida,
+            imagen_url: formaData.imagen_url || null
         }, AUTHHEADER());
         return response.data;
     },
     // Actualizar un producto
-    async actualizarProducto(id, nombre, descripcion, precio, categoria_id, stock) {
-        const response = await axios.put(`${ENDPOINTS.productos}${id}/`, {
-            nombre,
-            descripcion,
-            precio,
-            categoria_id,
-            stock
+    async actualizarProducto(id_producto, formData) {
+        const response = await axios.put(`${ENDPOINTS.productos}${id_producto}/`, {
+            nombre: formData.nombre,
+            descripcion: formData.descripcion,
+            precio_venta: formData.precio_venta,
+            costo: formData.costo,
+            categoria: formData.categoria_id,
+            unidad_medida: formData.unidad_medida,
+            imagen_url: formData.imagen_url || null
         }, AUTHHEADER());
         return response.data;
     },
