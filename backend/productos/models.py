@@ -6,14 +6,79 @@ class CategoriaProducto(models.Model):
     descripcion = models.TextField(blank=True, null=True)
     empresa = models.ForeignKey(Empresa, on_delete=models.CASCADE, related_name='categorias')
 
+    # Soporte para multiples niveles de categorias
+
+    categoria_padre = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='subcategorias',
+    )
+
+    # NUEVO: Campo para controlar profundidad
+    nivel = models.PositiveIntegerField(default=0, help_text="0=Principal, 1=Subcategoría, 2=Sub-subcategoría, etc.")
+
     class Meta:
         verbose_name = "Categoria de Productos"
         verbose_name_plural = "Categorias de Productos"
-        ordering = ['nombre']
-        unique_together = ('nombre', 'empresa')  # El nombre debe ser único por empresa
+        ordering = ['nivel', 'categoria_padre__nombre', 'nombre']
+        unique_together = ('nombre', 'empresa', 'categoria_padre')  # El nombre debe ser único por empresa
+
+    def save(self, *args, **kwargs):
+        # AUTO-CALCULAR el nivel basado en la jerarquía
+        if self.categoria_padre:
+            self.nivel = self.categoria_padre.nivel + 1
+        else:
+            self.nivel = 0
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.nombre} - {self.empresa.nombre}"
+        return self.get_path()
+
+    #--------------------------------------
+    # METODOS UTILES
+    #--------------------------------------
+    
+    def get_path(self):
+        """ Retorna la ruta completa de la categoría, e.g., 'Ropa > Hombre > Camisas' """
+        categorias = []
+        categoria = self
+        while categoria:
+            categorias.append(categoria.nombre)
+            categoria = categoria.categoria_padre
+        return " > ".join(reversed(categorias))
+
+    def get_all_subcategorias(self):
+        """ Retorna todas las subcategorías recursivamente """
+        subcategorias = list(self.subcategorias.all())
+        for sub in list(subcategorias):
+            subcategorias.extend(sub.get_all_subcategorias())
+        return subcategorias
+    
+    def get_root_categoria(self):
+        """ Retorna la categoría raíz (nivel 0) """
+        categoria = self
+        while categoria.categoria_padre:
+            categoria = categoria.categoria_padre
+        return categoria
+    
+    @property
+    def es_hoja(self):
+        """ Retorna True si la categoría no tiene subcategorías """
+        return not self.subcategorias.exists()
+    
+    @property
+    def profundidad_maxima(self):
+        """ Retorna la profundidad máxima de la jerarquía desde esta categoría """
+        if self.es_hoja:
+            return self.nivel
+        else:
+            return max(sub.profundidad_maxima for sub in self.subcategorias.all())
+    
+        
+
 
 class Producto(models.Model):
     #Opciones de unidada de medida

@@ -2,11 +2,33 @@ from rest_framework import serializers
 from .models import CategoriaProducto, Producto, MovimientoInventario, InventarioSucursal
 
 
+
 # ----------- Categoria Producto -----------
 class CategoriaProductoSerializer(serializers.ModelSerializer):
+    categoria_padre_nombre = serializers.CharField(source="categoria_padre.nombre", read_only=True)
+    subcategorias = serializers.SerializerMethodField()
+    path = serializers.CharField(source="get_path", read_only=True)
+    es_hoja = serializers.ReadOnlyField()
+    productos_count = serializers.SerializerMethodField()
+
     class Meta:
         model = CategoriaProducto
-        fields = ["id", "nombre", "descripcion"]
+        fields = ["id", "nombre", "descripcion", 
+                  "categoria_padre", "categoria_padre_nombre", "nivel",
+                  "subcategorias", "path", "es_hoja", "productos_count"]
+
+    #------------------------------------
+    # METODOS UTILES
+    #------------------------------------
+    def get_subcategorias(self, obj):
+        """ Retorna las subcategorías directas """
+        subcategorias = obj.subcategorias.all()
+        return CategoriaProductoSerializer(subcategorias, many=True, context=self.context).data
+    
+    def get_productos_count(self, obj):
+        """ Retorna el conteo de productos en esta categoría y todas las subcategorias"""
+        all_categorias = [obj] + obj.get_all_subcategorias()
+        return Producto.objects.filter(categoria__in=all_categorias).count()
 
 
 # ----------- Inventario por sucursal -----------

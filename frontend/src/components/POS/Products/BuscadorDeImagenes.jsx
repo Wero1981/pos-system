@@ -14,6 +14,7 @@ const BuscadorDeImagenes = ({ show, onHide, onSelectImage, nombreProducto }) => 
 
     // Manejar la búsqueda de imágenes
     const manejarBusqueda = async (e) => {
+        console.log("[DEBUG] manejarBusqueda llamado con query:", query);
         if(!query.trim()) {
             setError("Por favor ingresa un término de búsqueda.");
             return;
@@ -39,17 +40,19 @@ const BuscadorDeImagenes = ({ show, onHide, onSelectImage, nombreProducto }) => 
 
     //Manejar la selección de una imagen
     const manejarSeleccion = (url) => {
+        console.log("[DEBUG] Imagen seleccionada:", url);
         setImagenSeleccionada(url);
     }
 
     //Manejar la confirmación de la selección
     const manejarConfirmacion = async () => {
+        //console.log("[DEBUG] Confirmando selección de imagen:", imagenSeleccionada);    
         if(imagenSeleccionada) {
             try{
                 const response = await fetch(imagenSeleccionada);
                 const blob = await response.blob();
                 const file = new File([blob], "imagen_producto.jpg", { type: blob.type });
-                onSelectImage(imagenSeleccionada, file);
+                onSelectImage(file, imagenSeleccionada);
                 onHide();
             } catch (error) {
                 console.error("Error al seleccionar la imagen:", error);
@@ -73,8 +76,26 @@ const BuscadorDeImagenes = ({ show, onHide, onSelectImage, nombreProducto }) => 
         if(show && nombreProducto && nombreProducto.trim()) {
             console.log("[DEBUG] useEffect2 show o nombreProducto cambió:", show, nombreProducto, nombreProducto.trim());
 
-            setQuery(nombreProducto);
-            manejarBusqueda();
+            setQuery(nombreProducto.trim());
+            
+            //Crear funcion separada para la busqeda automatica
+            const busquedaAutomatica = async () => {
+                setCargando(true);
+                setError(null);
+                try {
+                    const imagenesEncontradas = await buscarImagenes(nombreProducto.trim());
+                    setImagenes(imagenesEncontradas);
+                    if(imagenesEncontradas.length === 0) {
+                        setError("No se encontraron imágenes para el término proporcionado.");
+                    }
+                } catch (error) {
+                    setError("Ocurrió un error al buscar imágenes. Inténtalo de nuevo.");
+                } finally {
+                    setCargando(false);
+                }
+            }
+
+            busquedaAutomatica();
         }
     }, [show, nombreProducto]);
 
