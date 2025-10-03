@@ -38,8 +38,79 @@ class CategoriaProductoViewSet(viewsets.ModelViewSet):
             serializer.save(empresa=empresa)
         else:
             raise PermissionError("No tienes permiso para crear categorias.")
-        
+
+    # UPDATE
+    def perform_update(self, serializer):
+        """
+            Al actualizar la categoria, se asigna la sucursal del usuario
+            - admin_system no puede actualizar categorias
+            - admin_empresa y cotador_empresa actualizan categorias para su empresa
+        """
+        usuario = self.request.user
+        empresa = usuario.empresa
+
+        if usuario.rol in ['admin_empresa', 'cotador_empresa']:
+            if serializer.instance.empresa == empresa:
+                serializer.save()
+            else:
+                raise PermissionError("No tienes permiso para actualizar categorias.")
+        else:
+            raise PermissionError("No tienes permiso para actualizar categorias.")
     
+    #ELIMINAR
+    def perform_destroy(self, instance):
+        """
+            Al eliminar la categoria, se asigna la sucursal del usuario
+            - admin_system no puede eliminar categorias
+            - admin_empresa y cotador_empresa eliminan categorias para su empresa
+        """
+        usuario = self.request.user
+        empresa = usuario.empresa
+
+        if usuario.rol in ['admin_empresa', 'cotador_empresa']:
+            if instance.empresa == empresa:
+                instance.delete()
+            else:
+                raise PermissionError("No tienes permiso para eliminar categorias.")
+        else:
+            raise PermissionError("No tienes permiso para eliminar categorias.")
+
+    # ------------------------------------
+    # METODOS ADICIONALES
+    # ------------------------------------     
+    
+    # Obtener subcategorias y conteo de productos
+    @action(detail=False, methods=['get'])
+    def jerarquia(self, request):
+        """
+        Obtener categorias organizadas jerárquicamente
+        """
+        usuario = self.request.user
+
+        categorias_principales = CategoriaProducto.objects.filter(
+            empresa=usuario.empresa,
+            categoria_padre__isnull=True
+        )
+
+        serializer = self.get_serializer(categorias_principales, many=True)
+        return Response(serializer.data)
+    
+
+    #Solo categorias principales
+    @action(detail=False, methods=['get'])
+    def principales(self, request):
+        """
+        Obtener solo categorias principales (sin categoria_padre)
+        """
+        usuario = self.request.user
+
+        categorias_principales = CategoriaProducto.objects.filter(
+            empresa=usuario.empresa,
+            categoria_padre__isnull=True
+        )
+
+        serializer = self.get_serializer(categorias_principales, many=True)
+        return Response(serializer.data)
 
 class ProductoViewSet(viewsets.ModelViewSet):
     serializer_class = ProductoSerializer
@@ -79,11 +150,11 @@ class ProductoViewSet(viewsets.ModelViewSet):
                 Q(nombre__icontains=search) |
                 Q(descripcion__icontains=search) |
                 Q(codigo_barras__icontains=search)
-            )
+            ) 
         
         return queryset.select_related('categoria', 'empresa').order_by('nombre')
 
-    # ✅ AGREGAR: Endpoint específico para buscar
+    #  AGREGAR: Endpoint específico para buscar
     @action(detail=False, methods=['get'])
     def buscar(self, request):
         """
@@ -115,7 +186,7 @@ class ProductoViewSet(viewsets.ModelViewSet):
             'count': queryset.count()
         })
 
-    # ✅ AGREGAR: Endpoint para productos por categoría
+    #  AGREGAR: Endpoint para productos por categoría
     @action(detail=False, methods=['get'])
     def por_categoria(self, request):
         """

@@ -10,10 +10,13 @@ import {
   getFilteredRowModel,
   flexRender,
 } from "@tanstack/react-table";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFolder } from '@fortawesome/free-solid-svg-icons';   
 
 import InventarioServices from "../../../services/InventarioServices";
 import ProductosServicesCategorias from "../../../services/ProductoServices";
 import BuscadorDeImagenes from "./BuscadorDeImagenes";
+import CategoriaItem from "./categoriaItem";
 
 const  PAGE_SIZE = 10;
 
@@ -22,6 +25,7 @@ function Catalogo (){
 
     const [productos, setProductos] = useState([]);
     const [categorias, setCategorias] = useState([]);
+    const [categoriasJerarquicas, setCategoriasJerarquicas] = useState([]);
     const [loading, setLoading] = useState(false);
     const [loadingCategoria, setLoadingCategoria] = useState(false);
 
@@ -52,6 +56,7 @@ function Catalogo (){
     const [formCategoria, setFormCategoria] = useState({
         nombre: "",
         descripcion: "",
+        categoria_padre: "",
     });
 
     //paginacion
@@ -63,10 +68,13 @@ function Catalogo (){
         const init = async () => {
             setLoading(true);
             try {
-                const cats = await InventarioServices.obtenerCategorias();
+                const cats = await ProductosServicesCategorias.obtenerCategorias();
                 setCategorias(cats);
                 
-                // Cargar todos los productos inicialmente
+                // Organizar en jerarquía
+                const jerarquia = organizarCategoriasPorJerarquia(cats);
+                setCategoriasJerarquicas(jerarquia);
+                
                 await cargarProductosPorCategoria("todas");
             } catch (error) {
                 console.error("Error al cargar datos:", error);
@@ -76,6 +84,19 @@ function Catalogo (){
         };
         init();
     }, []);
+
+    /*
+    *funcion recursiva para organizar categorias jerarquicamente
+    */
+    const organizarCategoriasPorJerarquia = (categorias) => {
+        const principales = categorias.filter(cat => !cat.categoria_padre);
+        const subcategorias = categorias.filter(cat => cat.categoria_padre);
+        
+        return principales.map(principal => ({
+            ...principal,
+            subcategorias: subcategorias.filter(sub => sub.categoria_padre === principal.id)
+        }));
+    };
 
     const cargarProductosPorCategoria = async (categoriaId) => {
         setLoadingCategoria(true);
@@ -91,7 +112,6 @@ function Catalogo (){
     };
 
     
-
     //filtrar inventario por busqueda y categoria
     const dataFiltered = useMemo(() => {
         if (!busqueda.trim()) {
@@ -106,20 +126,50 @@ function Catalogo (){
         );
     }, [productos, busqueda]);
 
+    const crearSubcategoria = (categoriaPadreId) => {
+        setFormCategoria({
+            nombre: "",
+            descripcion: "",
+            categoria_padre: categoriaPadreId.toString()
+        });
+        setShowModalCategoria(true);
+    };
 
     //guardar categoria
     const handleGuardarCategoria = async () => {
-        //console.log("[DEBUG] Guardar categoria:", formCategoria);
         try {
-            await InventarioServices.crearCategoria(formCategoria);
-            const cats = await InventarioServices.obtenerCategorias();
+            console.log("[DEBUG] Guardar categoria:", formCategoria);
+            
+            const dataToSend = {
+                nombre: formCategoria.nombre,
+                descripcion: formCategoria.descripcion,
+            };
+            
+            // ✅ AGREGAR: categoria_padre si existe
+            if (formCategoria.categoria_padre) {
+                dataToSend.categoria_padre = parseInt(formCategoria.categoria_padre);
+            }
+            
+            await ProductosServicesCategorias.crearCategoria(dataToSend);
+            
+            // ✅ RECARGAR: Categorías y reorganizar jerarquía
+            const cats = await ProductosServicesCategorias.obtenerCategorias();
             setCategorias(cats);
+            
+            const jerarquia = organizarCategoriasPorJerarquia(cats);
+            setCategoriasJerarquicas(jerarquia);
+            
             setShowModalCategoria(false);
-            setFormCategoria({ nombre: "", descripcion: "" });
+            setFormCategoria({ nombre: "", descripcion: "", categoria_padre: "" });
+            
+            // ✅ RECARGAR productos si es necesario
+            await cargarProductosPorCategoria(categoriaFilter);
+            
         } catch (error) {
             console.error("Error al guardar categoria:", error);
+            alert(`Error: ${error.response?.data?.message || error.message}`);
         }
-    }
+    };
 
     // Columnas: imagen, nombre, codigo, categoria, precio, stock editable, acciones
     const columnHelper = createColumnHelper();
@@ -346,19 +396,24 @@ function Catalogo (){
                                     active={categoriaFilter === "todas"}
                                     onClick={() => handleCategoriaFilter("todas")}
                                     disabled={loadingCategoria}
+                                    className="fw-bold"
                                 >
-                                    Todas
+                                    <FontAwesomeIcon icon={faFolder} />
+                                    Todas las categorias
+                                    <span className="badge bg-secondary float-end">{productos.length}</span>
+                                    
+                                    
                                 </ListGroup.Item>
-                                {categorias.map(cat => (
-                                    <ListGroup.Item
-                                        key={cat.id}
-                                        action
-                                        active={categoriaFilter === cat.id.toString()}
-                                        onClick={() => handleCategoriaFilter(cat.id.toString())}
-                                        disabled={loadingCategoria}
-                                    >
-                                        {cat.nombre}
-                                    </ListGroup.Item>
+                                {categoriasJerarquicas.map(categoria => (
+                                    <CategoriaItem
+                                        key={categoria.id}
+                                        categoria={categoria}
+                                        categoriaFilter={categoriaFilter}
+                                        onCategoriaSelect={handleCategoriaFilter}
+                                        loadingCategoria={loadingCategoria}
+                                        nivel={0}
+                                        onCrearSubcategoria={crearSubcategoria} // ✅ PASAR función
+                                    />
                                 ))}
                             </ListGroup>
                         </CardBody>
@@ -394,7 +449,7 @@ function Catalogo (){
                         </CardHeader>
                         
                         <CardBody>
-                            {/* ✅ MEJORAR: Información de estado */}
+                            {/*  MEJORAR: Información de estado */}
                             <div className="mb-2 text-muted small d-flex justify-content-between align-items-center">
                                 <span>
                                     {dataFiltered.length} de {productos.length} productos
@@ -517,11 +572,38 @@ function Catalogo (){
                         </Row>
                         <Form.Group className="mb-3">
                             <Form.Label>Categoría</Form.Label>
-                            <Form.Select value={formProducto.categoria_id} onChange={e => setFormProducto({...formProducto, categoria_id: e.target.value})}>
+                            <Form.Select value={formProducto.categoria_id} 
+                                onChange={e => setFormProducto({...formProducto, categoria_id: e.target.value})}>
                                 <option value="">--Seleccione una categoría--</option>
-                                {categorias.map(cat => (
-                                    <option key={cat.id} value={cat.id}>{cat.nombre}</option>
-                                ))}
+                                {categorias
+                                    .filter(cat => !cat.categoria_padre)
+                                    .map(cat => (
+                                        <option key={cat.id} value={cat.id}>
+                                            📁 {cat.nombre}
+                                        </option>
+                                    ))
+                                }
+                                {categorias
+                                    .filter(cat => cat.categoria_padre)
+                                    .map(cat => (
+                                        <option key={cat.id} value={cat.id}>
+                                            &nbsp;&nbsp;↳ {cat.nombre}
+                                        </option>
+                                    ))
+                                }
+                                {formProducto.categoria_id && (
+                                    <Form.Text className="text-muted">
+                                        {(() => {
+                                            const catSeleccionada = categorias.find(c => c.id.toString() === formProducto.categoria_id);
+                                            if (catSeleccionada?.categoria_padre) {
+                                                const padre = categorias.find(c => c.id === catSeleccionada.categoria_padre);
+                                                return `📂 ${padre?.nombre} > ${catSeleccionada.nombre}`;
+                                            }
+                                            return `📁 ${catSeleccionada?.nombre}`;
+                                        })()}
+                                    </Form.Text>
+                                )}
+        
                             </Form.Select>
                         </Form.Group>
                        
@@ -608,12 +690,39 @@ function Catalogo (){
                                 value={formCategoria.descripcion} 
                                 onChange={e => setFormCategoria({...formCategoria, descripcion: e.target.value})} />
                         </Form.Group>
+
+                        <Form.Group className="mb-3">
+                            <Form.Label>Categoría Padre (opcional)</Form.Label>
+                            <Form.Select 
+                                value={formCategoria.categoria_padre || ""} 
+                                onChange={e => setFormCategoria({...formCategoria, categoria_padre: e.target.value || null})}
+                            >
+                                <option value="">--Ninguna--</option>
+                                {categorias.map(cat => (
+                                    <option key={cat.id} value={cat.id}>{cat.nombre}</option>
+                                ))}
+                            </Form.Select>
+                            <Form.Text className="text-muted">
+                                {formCategoria.categoria_padre ?
+                                "Se creara como subcategoria" :
+                                "Se creara como categoría principal"
+                                }
+                            </Form.Text>
+                        </Form.Group>   
         
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowModalCategoria(false)}>Cancelar</Button>
-                    <Button variant="primary" onClick={handleGuardarCategoria}>Guardar</Button>
+                    <Button variant="secondary" onClick={() => 
+                        {
+                            setShowModalCategoria(false)
+                            setFormCategoria({ nombre: "", descripcion: "", categoria_padre: "" })
+
+                        }
+                        }>Cancelar</Button>
+                    <Button variant="primary" onClick={handleGuardarCategoria}>
+                        {formCategoria.categoria_padre ? "Crear Subcategoría" : "Crear Categoría"}
+                    </Button>
                 </Modal.Footer>
             </Modal>
 
