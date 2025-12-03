@@ -111,7 +111,59 @@ class Producto(models.Model):
     def __str__(self):
         return f"{self.nombre} ({self.codigo_barras})"
     
+    #--------------------------------------
+    # METODOS UTILES
+    #--------------------------------------
+    
+    def get_margen_ganancia(self):
+        """ Retorna el margen de ganancia (precio_venta - costo) """
+        if self.costo is None:
+            return None
+        return self.precio_venta - self.costo
+    
+    def get_margen_porcentaje(self):
+        """ Retorna el porcentaje de margen de ganancia """
+        if self.costo is None or self.costo == 0:
+            return None
+        margen = self.precio_venta - self.costo
+        return (margen / self.costo) * 100
+    
+    def has_stock(self):
+        """ Retorna True si el producto tiene stock en alguna sucursal """
+        return self.inventarios.filter(stock_actual__gt=0).exists()
+    
+    def get_stock_total(self):
+        """ Retorna el stock total del producto en todas las sucursales """
+        from django.db.models import Sum
+        total = self.inventarios.aggregate(total=Sum('stock_actual'))['total']
+        return total or 0
+    
+    def get_stock_by_sucursal(self, sucursal):
+        """ Retorna el stock del producto en una sucursal específica """
+        try:
+            inventario = self.inventarios.get(sucursal=sucursal)
+            return inventario.stock_actual
+        except InventarioSucursal.DoesNotExist:
+            return 0
+    
+    def es_bajo_stock(self, umbral=5):
+        """ Retorna True si el stock total es menor o igual al umbral """
+        return self.get_stock_total() <= umbral
+    
+    @property
+    def tiene_costo(self):
+        """ Retorna True si el producto tiene un costo asignado """
+        return self.costo is not None
+    
+    @property
+    def esta_activo(self):
+        """ Retorna True si el producto tiene stock en alguna sucursal """
+        return self.has_stock()
+    
 class InventarioSucursal(models.Model):
+    # Constantes
+    UMBRAL_BAJO_STOCK = 5  # Umbral por defecto para stock bajo
+    
     sucursal = models.ForeignKey(Sucursal, on_delete=models.CASCADE, related_name='inventarios')
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='inventarios')
     stock_actual = models.IntegerField(default=0)
@@ -121,6 +173,34 @@ class InventarioSucursal(models.Model):
 
     def __str__(self):
         return f"{self.producto.nombre} en {self.sucursal.nombre}: {self.stock_actual}"
+    
+    #--------------------------------------
+    # METODOS UTILES
+    #--------------------------------------
+    
+    def has_stock(self):
+        """ Retorna True si hay stock disponible """
+        return self.stock_actual > 0
+    
+    def es_bajo_stock(self, umbral=None):
+        """ Retorna True si el stock es menor o igual al umbral """
+        if umbral is None:
+            umbral = self.UMBRAL_BAJO_STOCK
+        return self.stock_actual <= umbral
+    
+    @property
+    def esta_agotado(self):
+        """ Retorna True si el stock es 0 """
+        return self.stock_actual == 0
+    
+    @property
+    def nivel_stock(self):
+        """ Retorna el nivel de stock: 'agotado', 'bajo', 'normal' """
+        if self.stock_actual == 0:
+            return 'agotado'
+        elif self.stock_actual <= self.UMBRAL_BAJO_STOCK:
+            return 'bajo'
+        return 'normal'
 
 class MovimientoInventario(models.Model):
     TIPOS = (
@@ -138,4 +218,41 @@ class MovimientoInventario(models.Model):
             f"{self.get_tipo_movimiento_display()} "
             f"{self.cantidad} de {self.inventario.producto.nombre} "
             f"({self.inventario.sucursal.nombre})"
+        )
+    
+    #--------------------------------------
+    # METODOS UTILES
+    #--------------------------------------
+    
+    @property
+    def es_entrada(self):
+        """ Retorna True si es un movimiento de entrada """
+        return self.tipo_movimiento == 'entrada'
+    
+    @property
+    def es_salida(self):
+        """ Retorna True si es un movimiento de salida """
+        return self.tipo_movimiento == 'salida'
+    
+    @property
+    def es_ajuste(self):
+        """ Retorna True si es un movimiento de ajuste """
+        return self.tipo_movimiento == 'ajuste'
+    
+    def get_tipo_icono(self):
+        """ Retorna un icono representativo del tipo de movimiento """
+        iconos = {
+            'entrada': '📥',
+            'salida': '📤',
+            'ajuste': '🔧',
+        }
+        return iconos.get(self.tipo_movimiento, '❓')
+    
+    @property
+    def descripcion_completa(self):
+        """ Retorna una descripción completa del movimiento """
+        return (
+            f"{self.get_tipo_icono()} {self.get_tipo_movimiento_display()}: "
+            f"{self.cantidad} unidades de {self.inventario.producto.nombre} "
+            f"en {self.inventario.sucursal.nombre}"
         )

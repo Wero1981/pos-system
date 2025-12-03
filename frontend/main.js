@@ -8,13 +8,22 @@ function createWindow() {
     width: 1200,
     height: 800,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false,
+      contextIsolation: true
+    }
+  });
+
+  // Filtrar errores conocidos de DevTools
+  mainWindow.webContents.on('console-message', (event, level, message) => {
+    if (message.includes('Autofill.enable') || message.includes('Autofill.setAddresses')) {
+      event.preventDefault();
     }
   });
 
   if (!app.isPackaged) {
     mainWindow.loadURL('http://localhost:3000');
-    mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools(); // DevTools habilitado para depurar
   } else {
     mainWindow.loadFile(path.join(__dirname, 'build', 'index.html'));
   }

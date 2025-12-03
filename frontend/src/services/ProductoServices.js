@@ -16,7 +16,33 @@ const AUTHHEADER = () => ({
 const ProductosServicesCategorias = {
     // Obtener todas las categorias de productos
     async obtenerCategorias() {
-        const response = await axios.get(ENDPOINTS.productos, AUTHHEADER());
+        const response = await axios.get(ENDPOINTS.categorias, AUTHHEADER());
+        return response.data;
+    },
+
+    // Crear una nueva categoria de producto
+    async crearCategoria(formData) {
+        const response = await axios.post(ENDPOINTS.categorias, {
+            nombre: formData.nombre,
+            descripcion: formData.descripcion,
+            categoria_padre: formData.categoria_padre || null
+        }, AUTHHEADER());
+        return response.data;
+    },
+
+    // Actualizar una categoria de producto
+    async actualizarCategoria(id, formData) {
+        const response = await axios.put(`${ENDPOINTS.categorias}${id}/`, {
+            nombre: formData.nombre,
+            descripcion: formData.descripcion,
+            categoria_padre: formData.categoria_padre || null
+        }, AUTHHEADER());
+        return response.data;
+    },
+
+    // Eliminar una categoria de producto
+    async eliminarCategoria(id) {
+        const response = await axios.delete(`${ENDPOINTS.categorias}${id}/`, AUTHHEADER());
         return response.data;
     },
 
@@ -50,6 +76,40 @@ const ProductosServicesCategorias = {
         const url = `${ENDPOINTS.productos}buscar/?${params.toString()}`;
         const response = await axios.get(url, AUTHHEADER());
         return response.data.results || response.data;
+    },
+
+    // Crear un nuevo producto
+    async crearProducto(formData) {
+        const response = await axios.post(ENDPOINTS.productos, {
+            nombre: formData.nombre,
+            descripcion: formData.descripcion,
+            costo: formData.costo,
+            precio_venta: formData.precio_venta,
+            categoria: formData.categoria_id,
+            unidad_medida: formData.unidad_medida,
+            imagen_url: formData.imagen_url || null
+        }, AUTHHEADER());
+        return response.data;
+    },
+
+    // Actualizar un producto
+    async actualizarProducto(id, formData) {
+        const response = await axios.put(`${ENDPOINTS.productos}${id}/`, {
+            nombre: formData.nombre,
+            descripcion: formData.descripcion,
+            costo: formData.costo,
+            precio_venta: formData.precio_venta,
+            categoria: formData.categoria_id,
+            unidad_medida: formData.unidad_medida,
+            imagen_url: formData.imagen_url || null
+        }, AUTHHEADER());
+        return response.data;
+    },
+
+    // Eliminar un producto
+    async eliminarProducto(id) {
+        const response = await axios.delete(`${ENDPOINTS.productos}${id}/`, AUTHHEADER());
+        return response.data;
     }
 }
 
