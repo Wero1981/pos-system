@@ -125,7 +125,7 @@ class Producto(models.Model):
         """ Retorna el porcentaje de margen de ganancia """
         if self.costo is None or self.costo == 0:
             return None
-        margen = self.get_margen_ganancia()
+        margen = self.precio_venta - self.costo
         return (margen / self.costo) * 100
     
     def has_stock(self):
@@ -161,6 +161,9 @@ class Producto(models.Model):
         return self.has_stock()
     
 class InventarioSucursal(models.Model):
+    # Constantes
+    UMBRAL_BAJO_STOCK = 5  # Umbral por defecto para stock bajo
+    
     sucursal = models.ForeignKey(Sucursal, on_delete=models.CASCADE, related_name='inventarios')
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='inventarios')
     stock_actual = models.IntegerField(default=0)
@@ -179,8 +182,10 @@ class InventarioSucursal(models.Model):
         """ Retorna True si hay stock disponible """
         return self.stock_actual > 0
     
-    def es_bajo_stock(self, umbral=5):
+    def es_bajo_stock(self, umbral=None):
         """ Retorna True si el stock es menor o igual al umbral """
+        if umbral is None:
+            umbral = self.UMBRAL_BAJO_STOCK
         return self.stock_actual <= umbral
     
     @property
@@ -193,7 +198,7 @@ class InventarioSucursal(models.Model):
         """ Retorna el nivel de stock: 'agotado', 'bajo', 'normal' """
         if self.stock_actual == 0:
             return 'agotado'
-        elif self.stock_actual <= 5:
+        elif self.stock_actual <= self.UMBRAL_BAJO_STOCK:
             return 'bajo'
         return 'normal'
 
